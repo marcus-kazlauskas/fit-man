@@ -1,0 +1,17 @@
+services:
+
+  fit-man-postgres:
+    build:
+      context: ./postgres
+      dockerfile: Containerfile
+    container_name: fit-man-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - "fit-man-postgres-data:/var/lib/postgresql/data"
+
+volumes:
+  fit-man-postgres-data:
