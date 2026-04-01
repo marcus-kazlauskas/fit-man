@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: v1.0.0/01_create_activity.sql
+      relativeToChangelogFile: true
+  - include:
+      file: v1.0.0/02_create_record.sql
+      relativeToChangelogFile: true

@@ -1,3 +1,11 @@
 spring:
   application:
     name: app
+  liquibase:
+    change-log: db/changelog/changelog.yaml
+    enabled: true
+    drop-first: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fit-man-db
+    username: fit-man
+    password: fit-man
