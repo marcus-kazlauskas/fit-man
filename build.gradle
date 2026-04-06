@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'pmd'
+	id 'org.openapi.generator' version "${openapiGeneratorVersion}"
 }
 
 group = 'fit.man'
@@ -23,17 +24,52 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocStarterUi"
+	implementation "jakarta.validation:jakarta.validation-api"
+	implementation "io.swagger.core.v3:swagger-annotations:$swaggerCoreVersion"
+	implementation "io.swagger.core.v3:swagger-core:$swaggerCoreVersion"
+
 	runtimeOnly 'org.postgresql:postgresql'
+
 //	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
 //	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 pmd {
 	consoleOutput = true
-	toolVersion = "${pmdToolVersion}"
+	version = "${pmdVersion}"
 	rulesMinimumPriority = 5
-	ruleSets = ["category/java/errorprone.xml", "category/java/bestpractices.xml"]
+	ruleSets = []
+	ruleSetFiles = files("$rootDir/pmd/ruleset.xml")
+}
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$rootDir/api/openapi-fit-man.yaml"
+	outputDir = "$rootDir/build/generated/openapi"
+	apiPackage = "fit.man.app.api"
+	modelPackage = "fit.man.app.api.model"
+	validateSpec = true
+	configOptions = [
+	        "useSpringBoot4": "true",
+			"useJakartaEe": "true",
+			"dateLibrary": "java8",
+			"useJackson3": "true",
+			"openApiNullable": "false",
+			"generateBuilders": "true",
+			"interfaceOnly": "true"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs += "$rootDir/build/generated/openapi/src/main/java"
+		}
+	}
 }
 
 tasks.named('test') {
