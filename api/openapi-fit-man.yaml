@@ -39,6 +39,12 @@ components:
       type: object
       required:
         - id
+        - endTime
+        - startTime
+        - sport
+        - userName
+        - deviceName
+        - marked
       properties:
         id:
           description: Activity ID
@@ -115,6 +121,7 @@ components:
       type: object
       required:
         - id
+        - mark
       properties:
         id:
           description: Record ID

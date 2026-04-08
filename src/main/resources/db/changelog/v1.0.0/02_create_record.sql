@@ -5,9 +5,9 @@ create table if not exists record (
     id bigint primary key generated always as identity,
     position_lat double precision,
     position_long double precision,
-    distance double precision,
-    enhanced_speed double precision,
-    enhanced_altitude double precision,
+    distance float,
+    enhanced_speed float,
+    enhanced_altitude float,
     mark smallint not null
         default 1,
     activity_id bigint not null

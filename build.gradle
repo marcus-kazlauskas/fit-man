@@ -4,6 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'pmd'
 	id 'org.openapi.generator' version "${openapiGeneratorVersion}"
+	id 'io.freefair.lombok' version "${lombokVersion}"
 }
 
 group = 'fit.man'
@@ -25,10 +26,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
 
-	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocStarterUi"
-	implementation "jakarta.validation:jakarta.validation-api"
-	implementation "io.swagger.core.v3:swagger-annotations:$swaggerCoreVersion"
-	implementation "io.swagger.core.v3:swagger-core:$swaggerCoreVersion"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocStarterUi}"
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	implementation "com.garmin:fit:${fitVersion}"
 
 	runtimeOnly 'org.postgresql:postgresql'
 
@@ -53,14 +56,17 @@ openApiGenerate {
 	apiPackage = "fit.man.app.api"
 	modelPackage = "fit.man.app.api.model"
 	validateSpec = true
+	importMappings = [
+			"Nullable": "org.jspecify.annotations.Nullable"
+	]
 	configOptions = [
 	        "useSpringBoot4": "true",
-			"useJakartaEe": "true",
-			"dateLibrary": "java8",
 			"useJackson3": "true",
 			"openApiNullable": "false",
 			"generateBuilders": "true",
-			"interfaceOnly": "true"
+			"interfaceOnly": "true",
+			"useSpringNullSafety": "false",
+			"additionalModelTypeAnnotations": "@org.jspecify.annotations.NullMarked"
 	]
 }
 
