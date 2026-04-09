@@ -15,6 +15,7 @@ import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
 import fit.man.app.repository.entity.Record;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -98,22 +100,31 @@ public class ActivityService {
                 record.setDistance(mesg.getDistance());
                 record.setEnhancedSpeed(mesg.getEnhancedSpeed());
                 record.setEnhancedAltitude(mesg.getEnhancedAltitude());
-                activity.getRecords().add(record);
+                activity.addRecord(record);
             });
 
             try {
                 broadcaster.run(is);
             } catch (FitRuntimeException e) {
-                System.err.println("Error in fit-file: " + e.getMessage());
+                log.atWarn().log(e.getMessage());
+                return activityMapper.toResponse(activity);
             }
 
             activity.setStartTime(startTime.get().atOffset(zoneOffset.get()));
             activity.setEndTime(endTime.get().atOffset(zoneOffset.get()));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            log.atError().log(e.getMessage());
         }
 
-        var savedActivity = activityRepository.save(activity);
-        return activityMapper.toResponse(savedActivity);
+        return activityMapper.toResponse(checkNotExistsAndSave(activity));
+    }
+
+    private Activity checkNotExistsAndSave(Activity activity) {
+        if (activityRepository.existsByStartTime(activity.getStartTime())) {
+            log.atWarn().log("This activity is already saved in DB");
+            return activity;
+        } else {
+            return activityRepository.save(activity);
+        }
     }
 }

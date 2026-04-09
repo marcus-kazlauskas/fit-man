@@ -6,6 +6,18 @@ spring:
     enabled: true
     drop-first: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/fit-man-db
+    url: jdbc:postgresql://localhost:5432/fit-man-db?reWriteBatchedInserts=true
     username: fit-man
     password: fit-man
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: true
+springdoc:
+  swagger-ui:
+    syntaxHighlight:
+      activated: false

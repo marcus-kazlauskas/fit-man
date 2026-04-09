@@ -1,6 +1,7 @@
 package fit.man.app.repository.entity;
 
 import com.garmin.fit.Sport;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -73,7 +74,12 @@ public class Activity {
     @Column(name = "marked", nullable = false)
     private boolean marked;
 
-    @OneToMany(mappedBy = "activity", orphanRemoval = true)
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Record> records = new ArrayList<>();
+
+    public void addRecord(Record record) {
+        records.add(record);
+        record.setActivity(this);
+    }
 }
