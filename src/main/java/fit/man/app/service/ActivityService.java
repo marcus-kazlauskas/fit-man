@@ -14,6 +14,7 @@ import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
 import fit.man.app.repository.entity.Record;
+import fit.man.app.util.LoggerUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -121,10 +123,18 @@ public class ActivityService {
 
     private Activity checkNotExistsAndSave(Activity activity) {
         if (activityRepository.existsByStartTime(activity.getStartTime())) {
-            log.atWarn().log("This activity is already saved in DB");
+            log.atWarn().log("This activity {} is already saved in DB", LoggerUtils.truncate(activity));
             return activity;
         } else {
-            return activityRepository.save(activity);
+            var savedActivity = activityRepository.save(activity);
+            log.atInfo().log("Saved activity {}", LoggerUtils.truncate(savedActivity));
+            return savedActivity;
         }
+    }
+
+    public double[][] getActivityTrackPoints(OffsetDateTime startTime) {
+        var points = activityMapper.toPointsArray(activityRepository.findByStartTime(startTime));
+        log.atInfo().log("Read points {}", LoggerUtils.truncate((Object) points));
+        return points;
     }
 }

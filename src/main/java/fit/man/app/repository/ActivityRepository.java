@@ -9,4 +9,6 @@ import java.time.OffsetDateTime;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     boolean existsByStartTime(OffsetDateTime startTime);
+
+    Activity findByStartTime(OffsetDateTime startTime);
 }
