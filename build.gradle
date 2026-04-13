@@ -12,7 +12,7 @@ version = '1.0.0'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of("${javaVersion}")
+		languageVersion = JavaLanguageVersion.of("$javaVersion")
 	}
 }
 
@@ -41,18 +41,18 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-pmd {
+pmdMain {
 	consoleOutput = true
-	version = "${pmdVersion}"
+	version = "$pmdVersion"
 	rulesMinimumPriority = 5
 	ruleSets = []
-	ruleSetFiles = files("$rootDir/pmd/ruleset.xml")
+	ruleSetFiles = files("$rootDir$rulesetFile")
 }
 
 openApiGenerate {
 	generatorName = "spring"
-	inputSpec = "$rootDir/api/openapi-fit-man.yaml"
-	outputDir = "$rootDir/build/generated/openapi"
+	inputSpec = "$rootDir$apiSpecDir/openapi-fit-man.yaml"
+	outputDir = "$rootDir$apiGenDir"
 	apiPackage = "fit.man.app.api"
 	modelPackage = "fit.man.app.api.model"
 	validateSpec = true
@@ -73,9 +73,27 @@ openApiGenerate {
 sourceSets {
 	main {
 		java {
-			srcDirs += "$rootDir/build/generated/openapi/src/main/java"
+			srcDirs += "$rootDir$apiGenDir/src/main/java"
 		}
 	}
+}
+
+tasks.register("copyOpenApiToResources", Copy) {
+	from("$rootDir$apiSpecDir")
+	into("$rootDir/build/resources/main/static")
+	include("*.yaml")
+}
+
+tasks.named("compileJava") {
+	dependsOn("openApiGenerate")
+}
+
+tasks.named("processResources") {
+	dependsOn("copyOpenApiToResources")
+}
+
+tasks.named("bootRun") {
+	dependsOn("pmdMain")
 }
 
 tasks.named('test') {

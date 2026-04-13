@@ -10,5 +10,5 @@ import java.time.OffsetDateTime;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     boolean existsByStartTime(OffsetDateTime startTime);
 
-    Activity findByStartTime(OffsetDateTime startTime);
+    Activity findByStartTimeBetween(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd);
 }

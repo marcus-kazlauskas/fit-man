@@ -4,18 +4,20 @@ import fit.man.app.api.model.ActivityResponse;
 import fit.man.app.repository.entity.Activity;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @FunctionalInterface
 @Mapper(componentModel = "spring")
 public interface ActivityMapper {
     ActivityResponse toResponse(Activity activity);
 
-    default double[][] toPointsArray(Activity activity) {
+    default List<List<Double>> toPointsList(Activity activity) {
         if (activity == null || activity.getRecords() == null) {
-            return new double[0][0];
+            return List.of(List.of());
         }
         return activity.getRecords().stream()
                 .filter(r -> r.getPositionLat() != null && r.getPositionLong() != null)
-                .map(r -> new double[]{r.getPositionLat(), r.getPositionLong()})
-                .toArray(double[][]::new);
+                .map(r -> List.of(r.getPositionLat(), r.getPositionLong()))
+                .toList();
     }
 }

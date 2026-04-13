@@ -5,6 +5,8 @@ info:
 tags:
   - name: FitManFile
     description: .fit files management
+  - name: FitManTrack
+    description: Track points
 paths:
   /file/upload:
     post:
@@ -27,6 +29,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ActivityResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /track/points:
+    get:
+      tags:
+        - FitManTrack
+      summary: Get track points
+      operationId: getTrackPoints
+      parameters:
+        - name: startTimeBegin
+          in: query
+          description: StartTime range begin
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: 2025-07-05T02:00:00+03:00
+        - name: startTimeEnd
+          in: query
+          description: StartTime range end
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: 2025-07-06T02:00:00+03:00
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackPoints"
         default:
           description: Unexpected error
           content:
@@ -158,6 +196,16 @@ components:
           type: integer
           format: int32
           example: 1
+    TrackPoints:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+          format: double
+      example:
+        - [55.7887, 49.1221]
+        - [55.7887, 49.1221]
     ErrorResponse:
       required:
         - code

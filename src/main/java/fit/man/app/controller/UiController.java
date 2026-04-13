@@ -6,7 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetTime;
 
 @RequiredArgsConstructor
 @Controller
@@ -15,8 +17,11 @@ public class UiController {
 
     @GetMapping("/map")
     public String showPage(Model model) {
-        var startTime = OffsetDateTime.parse("2025-07-05T02:59:50+03:00"); // TODO
-        var activityTrackPoints = activityService.getActivityTrackPoints(startTime);
+        var startTimeBegin = LocalDate.parse("2025-07-05")
+                .atTime(LocalTime.MIDNIGHT)
+                .atOffset(OffsetTime.now().getOffset()); // TODO
+        var startTimeEnd = startTimeBegin.plusDays(1);
+        var activityTrackPoints = activityService.getTrackPointsInRange(startTimeBegin, startTimeEnd);
 
         model.addAttribute("activityTrackPoints", activityTrackPoints);
 
