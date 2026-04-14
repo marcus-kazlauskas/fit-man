@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
+import java.time.OffsetTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -15,9 +16,14 @@ public class TrackController implements TrackApi {
     private final ActivityService activityService;
 
     @Override
-    public ResponseEntity<List<List<Double>>> getTrackPoints(OffsetDateTime startTimeBegin, OffsetDateTime startTimeEnd) {
+    public ResponseEntity<List<List<Double>>> getTrackPoints(String startTimeBegin, String startTimeEnd) {
+        var start = LocalDateTime.parse(startTimeBegin)
+                .atOffset(OffsetTime.now().getOffset());
+        var end = LocalDateTime.parse(startTimeEnd)
+                .atOffset(OffsetTime.now().getOffset());
+
         return ResponseEntity.ok(
-                activityService.getTrackPointsInRange(startTimeBegin, startTimeEnd)
+                activityService.getTrackPointsInRange(start, end)
         );
     }
 }
