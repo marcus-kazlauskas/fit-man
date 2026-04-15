@@ -5,10 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     boolean existsByStartTime(OffsetDateTime startTime);
 
-    Activity findByStartTimeBetween(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd);
+    List<Activity> findByStartTimeBetweenOrderByStartTime(
+            OffsetDateTime startTimeBegin ,
+            OffsetDateTime startTimeEnd
+    );
 }

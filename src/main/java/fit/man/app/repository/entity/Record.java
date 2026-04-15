@@ -43,8 +43,8 @@ public class Record {
     @Column(name = "enhanced_altitude")
     private Float enhancedAltitude;
 
-    @Column(name = "mark", nullable = false)
-    private short mark;
+    @Column(name = "mark")
+    private Short mark;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activity_id")

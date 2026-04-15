@@ -10,6 +10,7 @@ import com.garmin.fit.SessionMesg;
 import com.garmin.fit.SportMesg;
 import com.garmin.fit.UserProfileMesg;
 import fit.man.app.api.model.ActivityResponse;
+import fit.man.app.api.model.TrackResponse;
 import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
@@ -25,7 +26,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -132,11 +132,17 @@ public class ActivityService {
         }
     }
 
-    public List<List<Double>> getTrackPointsInRange(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd) {
-        var points = activityMapper.toPointsList(
-                activityRepository.findByStartTimeBetween(startTimeBegin, startTimeEnd)
+    public TrackResponse getTrackInRange(String startTimeBegin , String startTimeEnd) {
+        var start = activityMapper.toOffsetDateTime(startTimeBegin);
+        var end = activityMapper.toOffsetDateTime(startTimeEnd);
+        return getTrackInRange(start, end);
+    }
+
+    public TrackResponse getTrackInRange(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd) {
+        var track = activityMapper.toTrackResponse(
+                activityRepository.findByStartTimeBetweenOrderByStartTime(startTimeBegin, startTimeEnd).getFirst()
         );
-        log.atInfo().log("Read points {}", points);
-        return points;
+        log.atInfo().log("Read track {}", track);
+        return track;
     }
 }

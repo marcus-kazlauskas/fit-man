@@ -62,7 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrackPoints"
+                $ref: "#/components/schemas/TrackResponse"
         default:
           description: Unexpected error
           content:
@@ -194,6 +194,17 @@ components:
           type: integer
           format: int32
           example: 1
+    TrackResponse:
+      type: object
+      required:
+        - startTime
+      properties:
+        startTime:
+          description: Start date of the activity
+          type: string
+          example: "2026-04-01T13:12:00.000+03:00"
+        points:
+          $ref: "#/components/schemas/TrackPoints"
     TrackPoints:
       type: array
       items:
