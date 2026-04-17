@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="ru">
+<head>
+    <title>Activity Track Points</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        #map {
+            flex-grow: 1;
+            width: 100%;
+        }
+        .track-control {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+        }
+        .track-control input {
+            display: block;
+            padding: 0px;
+            margin-bottom: 5px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .track-control button {
+            width: 100%;
+            cursor: pointer;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .track-control button:hover {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script th:inline="javascript">
+        const map = L.map('map').setView([55.7887, 49.1221], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const trackControl = L.control({ position: 'topright' });
+        trackControl.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'track-control leaflet-bar');
+
+            div.innerHTML = `
+                <label>StartTime from:</label>
+                <input type="datetime-local" id="startTimeBegin">
+
+                <label>StartTime to:</label>
+                <input type="datetime-local" id="startTimeEnd">
+
+                <button id="showTrackBtn">Find track</button>
+
+                <label>Track startTime:</label>
+                <input type="text" id="trackStartTime" readonly placeholder="..." style="">
+            `;
+
+            const btn = div.querySelector('#showTrackBtn');
+            btn.addEventListener('click', loadTrack); 
+
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+
+            return div;
+        };
+        trackControl.addTo(map);
+
+        window.markerGroup = L.layerGroup().addTo(map);
+
+        async function loadTrack() {
+            const begin = document.getElementById('startTimeBegin').value;
+            const end = document.getElementById('startTimeEnd').value;
+
+            if (!begin || !end) {
+                alert("Set the beginning and end of the interval");
+                return;
+            }
+
+            const response = await fetch(`/track/points?startTimeBegin=${begin}&startTimeEnd=${end}`);
+            const track = await response.json();
+            const startTime = track.startTime;
+            const points = track.points;
+
+            if (startTime) {
+                trackStartTime.value = startTime;
+            } else {
+                trackStartTime.value = "...";
+            }
+
+            if (points && points.length > 0) {
+                if (window.markerGroup) {
+                    window.markerGroup.clearLayers();
+                }
+                if (window.currentPolyline) {
+                    map.removeLayer(window.currentPolyline);
+                }
+
+                const startPoint = points[0];
+                const finishPoint = points[points.length - 1];
+
+                window.currentPolyline = L.polyline(points, {
+                    color: 'blue',
+                    weight: 4,
+                    opacity: 0.65,
+                    smoothFactor: 1
+                }).addTo(map);
+
+                L.circleMarker(startPoint, {
+                    radius: 4,
+                    color: 'green', 
+                    fillOpacity: 0.65
+                }).addTo(window.markerGroup);
+                
+                L.circleMarker(finishPoint, {
+                    radius: 4,
+                    color: 'red', 
+                    fillOpacity: 0.65
+                }).addTo(window.markerGroup);
+
+                currentPolyline.bindTooltip("", {sticky: true});
+                currentPolyline.on('mousemove', function(e) {
+                    const {lat, lng} = e.latlng;
+                    this.setTooltipContent(`Lat: ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`);
+                });
+
+                map.fitBounds(window.currentPolyline.getBounds());
+            } else {
+                alert("No data for this period");
+            }
+        }
+    </script>
+</body>

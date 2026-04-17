@@ -1,0 +1,101 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+	id 'pmd'
+	id 'org.openapi.generator' version "${openapiGeneratorVersion}"
+	id 'io.freefair.lombok' version "${lombokVersion}"
+}
+
+group = 'fit.man'
+version = '1.0.0'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of("$javaVersion")
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocStarterUi}"
+
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	implementation "com.garmin:fit:${fitVersion}"
+
+	runtimeOnly 'org.postgresql:postgresql'
+
+//	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+//	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+pmdMain {
+	consoleOutput = true
+	version = "$pmdVersion"
+	rulesMinimumPriority = 5
+	ruleSets = []
+	ruleSetFiles = files("$rootDir$rulesetFile")
+}
+
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$rootDir$apiSpecDir/openapi-fit-man.yaml"
+	outputDir = "$rootDir$apiGenDir"
+	apiPackage = "fit.man.app.api"
+	modelPackage = "fit.man.app.api.model"
+	validateSpec = true
+	importMappings = [
+			"Nullable": "org.jspecify.annotations.Nullable"
+	]
+	configOptions = [
+	        "useSpringBoot4": "true",
+			"useJackson3": "true",
+			"openApiNullable": "false",
+			"generateBuilders": "true",
+			"interfaceOnly": "true",
+			"useSpringNullSafety": "false",
+			"additionalModelTypeAnnotations": "@org.jspecify.annotations.NullMarked"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs += "$rootDir$apiGenDir/src/main/java"
+		}
+	}
+}
+
+tasks.register("copyOpenApiToResources", Copy) {
+	from("$rootDir$apiSpecDir")
+	into("$rootDir/build/resources/main/static")
+	include("*.yaml")
+}
+
+tasks.named("compileJava") {
+	dependsOn("openApiGenerate")
+}
+
+tasks.named("processResources") {
+	dependsOn("copyOpenApiToResources")
+}
+
+tasks.named("bootRun") {
+	dependsOn("pmdMain")
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

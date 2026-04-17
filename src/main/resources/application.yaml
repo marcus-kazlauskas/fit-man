@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: app
+  liquibase:
+    change-log: db/changelog/changelog.yaml
+    enabled: true
+    drop-first: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fit-man-db?reWriteBatchedInserts=true
+    username: fit-man
+    password: fit-man
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: true
+springdoc:
+  swagger-ui:
+    api-docs:
+      enabled: false
+    url: /openapi-fit-man.yaml
+    syntaxHighlight:
+      activated: false
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%t] %-40.40logger{39} : %.-500m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+  level:
+    org.springframework.web.servlet.DispatcherServlet: DEBUG

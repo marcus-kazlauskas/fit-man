@@ -1,0 +1,236 @@
+openapi: 3.0.4
+info:
+  title: .fit files management tool (fit-man)
+  version: 1.0.0
+tags:
+  - name: FitManFile
+    description: .fit files management
+  - name: FitManTrack
+    description: Track points
+paths:
+  /file/upload:
+    post:
+      tags:
+        - FitManFile
+      summary: Upload .fit file
+      operationId: postFileUpload
+      requestBody:
+        description: .fit file
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /track/points:
+    get:
+      tags:
+        - FitManTrack
+      summary: Get track points
+      operationId: getTrackPoints
+      parameters:
+        - name: startTimeBegin
+          in: query
+          description: StartTime range begin
+          required: true
+          schema:
+            type: string
+            example: "2025-07-05T02:00:00"
+        - name: startTimeEnd
+          in: query
+          description: StartTime range end
+          required: true
+          schema:
+            type: string
+            example: "2025-07-06T02:00:00"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ActivityResponse:
+      type: object
+      required:
+        - id
+        - endTime
+        - startTime
+        - sport
+        - userName
+        - deviceName
+        - marked
+      properties:
+        id:
+          description: Activity ID
+          type: integer
+          format: int64
+          example: 1312
+        endTime:
+          description: End date of the activity
+          type: string
+          format: date-time
+          example: "2026-04-01T13:12:00.000+03:00"
+        startTime:
+          description: Start date of the activity
+          type: string
+          format: date-time
+          example: "2026-04-01T13:12:00.000+03:00"
+        sport:
+          description: Sport name
+          type: string
+          example: cycling
+        totalElapsedTime:
+          description: Total elapsed time
+          type: string
+          format: duration
+          example: "PT0H13M12S"
+        totalTimerTime:
+          description: Total timer time
+          type: string
+          format: duration
+          example: "PT0H13M12S"
+        totalDistance:
+          description: Total distance
+          type: number
+          format: float
+          example: 666.1312
+        totalCalories:
+          description: Total calories
+          type: number
+          format: float
+          example: 666.1312
+        totalAscent:
+          description: Total ascent
+          type: number
+          format: float
+          example: 666.1312
+        enhancedAvgSpeed:
+          description: Enhanced average speed
+          type: number
+          format: float
+          example: 13.12
+        enhancedMaxSpeed:
+          description: Enhanced maximum speed
+          type: number
+          format: float
+          example: 13.12
+        userName:
+          description: Sportsman name
+          type: string
+          example: Mikhail Kozlov
+        deviceName:
+          description: Device Name
+          type: string
+          example: Cannondale App
+        marked:
+          description: Internal analysis mark
+          type: boolean
+          example: false
+        records:
+          description: Geo data
+          type: array
+          items:
+            $ref: "#/components/schemas/Record"
+    Record:
+      type: object
+      required:
+        - id
+        - mark
+      properties:
+        id:
+          description: Record ID
+          type: integer
+          format: int64
+          example: 1312
+        positionTime:
+          description: Position time
+          type: string
+          example: "2025-07-05T14:07:18"
+        positionLat:
+          description: Position latitude
+          type: number
+          format: double
+          example: 55.7887
+        positionLong:
+          description: Position longitude
+          type: number
+          format: double
+          example: 49.1221
+        distance:
+          description: Distance
+          type: number
+          format: double
+          example: 100.00
+        enhancedSpeed:
+          description: Enhanced speed
+          type: number
+          format: double
+          example: 0.00
+        enhancedAltitude:
+          description: Enhanced altitude
+          type: number
+          format: double
+          example: 65.00
+        mark:
+          description: Analysis mark
+          type: integer
+          format: int32
+          example: 1
+    TrackResponse:
+      type: object
+      required:
+        - startTime
+      properties:
+        startTime:
+          description: Start date of the activity
+          type: string
+          example: "2026-04-01T13:12:00.000"
+        points:
+          $ref: "#/components/schemas/TrackPoints"
+    TrackPoints:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+          format: double
+      example:
+        - [55.7887, 49.1221]
+        - [55.7887, 49.1221]
+    ErrorResponse:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          description: Error code
+          type: integer
+          format: int32
+          example: 404
+        message:
+          description: Error message
+          type: string
+          example: Activity not found
