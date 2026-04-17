@@ -48,14 +48,14 @@ paths:
           required: true
           schema:
             type: string
-            example: 2025-07-05T02:00:00+03:00
+            example: "2025-07-05T02:00:00"
         - name: startTimeEnd
           in: query
           description: StartTime range end
           required: true
           schema:
             type: string
-            example: 2025-07-06T02:00:00+03:00
+            example: "2025-07-06T02:00:00"
       responses:
         "200":
           description: Successful operation
@@ -164,6 +164,10 @@ components:
           type: integer
           format: int64
           example: 1312
+        positionTime:
+          description: Position time
+          type: string
+          example: "2025-07-05T14:07:18"
         positionLat:
           description: Position latitude
           type: number
@@ -202,7 +206,7 @@ components:
         startTime:
           description: Start date of the activity
           type: string
-          example: "2026-04-01T13:12:00.000+03:00"
+          example: "2026-04-01T13:12:00.000"
         points:
           $ref: "#/components/schemas/TrackPoints"
     TrackPoints:

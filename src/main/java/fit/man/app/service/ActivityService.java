@@ -15,6 +15,7 @@ import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
 import fit.man.app.repository.entity.Record;
+import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -35,9 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
-
-    private static final int MILLIS = 1000;
-    private static final double DECIMAL_DEGREES = 180.0 / Math.pow(2, 31);
 
     public ActivityResponse loadNewActivity(Resource resource) {
         final var activity = new Activity();
@@ -66,9 +64,9 @@ public class ActivityService {
                 var fitStartTime = mesg.getStartTime();
                 startTime.set(fitStartTime.getDate().toInstant());
 
-                var totalElapsedTime = (long) (mesg.getTotalElapsedTime() * MILLIS);
+                var totalElapsedTime = (long) (mesg.getTotalElapsedTime() * ActivityUtils.MILLIS);
                 activity.setTotalElapsedTime(Duration.ofMillis(totalElapsedTime));
-                var totalTimeTime = (long) (mesg.getTotalTimerTime() * MILLIS);
+                var totalTimeTime = (long) (mesg.getTotalTimerTime() * ActivityUtils.MILLIS);
                 activity.setTotalTimerTime(Duration.ofMillis(totalTimeTime));
                 activity.setTotalDistance(mesg.getTotalDistance());
                 activity.setTotalCalories(mesg.getTotalCalories());
@@ -91,17 +89,22 @@ public class ActivityService {
 
             broadcaster.addListener((RecordMesg mesg) -> {
                 var record =  new Record();
+                var positionTimeUtc = mesg.getTimestamp().getDate().toInstant()
+                        .atOffset(ZoneOffset.UTC)
+                        .toLocalDateTime();
+                record.setPositionTime(positionTimeUtc);
                 var positionLat = mesg.getPositionLat();
                 if (positionLat != null) {
-                    record.setPositionLat(positionLat * DECIMAL_DEGREES);
+                    record.setPositionLat(positionLat * ActivityUtils.DECIMAL_DEGREES);
                 }
                 var positionLong = mesg.getPositionLong();
                 if (positionLong != null) {
-                    record.setPositionLong(positionLong * DECIMAL_DEGREES);
+                    record.setPositionLong(positionLong * ActivityUtils.DECIMAL_DEGREES);
                 }
                 record.setDistance(mesg.getDistance());
                 record.setEnhancedSpeed(mesg.getEnhancedSpeed());
                 record.setEnhancedAltitude(mesg.getEnhancedAltitude());
+                record.setMark(ActivityUtils.MARK_DEFAULT);
                 activity.addRecord(record);
             });
 

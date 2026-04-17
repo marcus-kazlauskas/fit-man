@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -27,6 +29,9 @@ public class Record {
     @SequenceGenerator(name = "record_gen", sequenceName = "record_seq", allocationSize = 50)
     @Column(name = "id", nullable = false)
     private long id;
+
+    @Column(name = "position_time")
+    private LocalDateTime positionTime;
 
     @Column(name = "position_lat")
     private Double positionLat;
