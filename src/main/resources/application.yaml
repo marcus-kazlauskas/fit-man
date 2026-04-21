@@ -29,3 +29,15 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%t] %-40.40logger{39} : %.-500m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test

@@ -42,10 +42,8 @@ where activity_id = {record.activity_id} and id >= {record.id};
 
 ### TODO
 
-- ControllerAdvice for error responses
 - Tests
-- Profiles: local, test
-- Github Actions workflow
+- GitHub Actions workflow
 - Analysis service to throw out corrupted data by speed calculation between points
 - AI to analysis???
 - Authorization???

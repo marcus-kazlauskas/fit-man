@@ -36,7 +36,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
 //	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
-//	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -63,7 +63,6 @@ openApiGenerate {
 	        "useSpringBoot4": "true",
 			"useJackson3": "true",
 			"openApiNullable": "false",
-			"generateBuilders": "true",
 			"interfaceOnly": "true",
 			"useSpringNullSafety": "false",
 			"additionalModelTypeAnnotations": "@org.jspecify.annotations.NullMarked"
