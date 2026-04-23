@@ -12,7 +12,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     boolean existsByStartTime(OffsetDateTime startTime);
 
     List<Activity> findByStartTimeBetweenOrderByStartTime(
-            OffsetDateTime startTimeBegin ,
+            OffsetDateTime startTimeBegin,
             OffsetDateTime startTimeEnd
     );
 }

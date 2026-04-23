@@ -132,8 +132,8 @@ public class ActivityService {
     }
 
     public TrackResponse getTrackInRange(String startTimeBegin , String startTimeEnd) {
-        var start = activityMapper.toOffsetDateTime(startTimeBegin);
-        var end = activityMapper.toOffsetDateTime(startTimeEnd);
+        var start = ActivityUtils.toOffsetDateTime(startTimeBegin);
+        var end = ActivityUtils.toOffsetDateTime(startTimeEnd);
         return getTrackInRange(start, end);
     }
 
