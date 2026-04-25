@@ -29,7 +29,7 @@ public final class ActivityFixtures {
         record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
         record.setPositionLat(55.7887);
         record.setPositionLong(49.1221);
-        record.setDistance(1F);
+        record.setDistance(12.13F);
         record.setEnhancedSpeed(4F);
         record.setEnhancedAltitude(1F);
         record.setMark((short) 1);

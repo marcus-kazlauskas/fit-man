@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset github.com/marcus-kazlauskas:1
-create sequence record_seq start 1 increment by 50;
+create sequence record_seq start with 1 increment by 50;
 
 --changeset github.com/marcus-kazlauskas:2
 create table if not exists record (

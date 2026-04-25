@@ -7,15 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
 public class ActivityRepositoryTests {
     @Autowired
     private ActivityRepository activityRepository;
@@ -33,6 +28,7 @@ public class ActivityRepositoryTests {
 
         assertThat(savedActivity.getId()).isNotNegative();
         assertThat(savedActivity.getRecords()).isNotNull();
+        assertThat(savedActivity.getRecords().getFirst()).isNotNull();
     }
 
     @Test
@@ -52,5 +48,7 @@ public class ActivityRepositoryTests {
         );
 
         assertThat(foundActivity).isNotNull();
+        assertThat(foundActivity).hasSize(1);
+        assertThat(foundActivity.getFirst().getId()).isNotNegative();
     }
 }
