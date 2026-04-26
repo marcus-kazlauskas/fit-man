@@ -37,7 +37,7 @@ public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
 
-    public ActivityResponse loadNewActivity(InputStream is) {
+    public Activity readFitFile(InputStream is) {
         final var activity = new Activity();
 
         var decode = new Decode();
@@ -117,10 +117,15 @@ public class ActivityService {
         activity.setStartTime(startTime.get().atOffset(zoneOffset.get()));
         activity.setEndTime(endTime.get().atOffset(zoneOffset.get()));
 
+        return activity;
+    }
+
+    public ActivityResponse loadNewActivity(InputStream is) {
+        var activity = readFitFile(is);
         return activityMapper.toResponse(checkNotExistsAndSave(activity));
     }
 
-    private Activity checkNotExistsAndSave(Activity activity) {
+    public Activity checkNotExistsAndSave(Activity activity) {
         if (activityRepository.existsByStartTime(activity.getStartTime())) {
             log.atWarn().log("This activity {} is already saved in DB", activity);
             throw new FitFileException("Activity with startTime specified is already saved in DB");
