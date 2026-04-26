@@ -5,6 +5,7 @@ plugins {
 	id 'pmd'
 	id 'org.openapi.generator' version "${openapiGeneratorVersion}"
 	id 'io.freefair.lombok' version "${lombokVersion}"
+	id 'jacoco'
 }
 
 group = 'fit.man'
@@ -81,9 +82,15 @@ sourceSets {
 	}
 }
 
+jacocoTestReport {
+	version = "$jacocoVersion"
+	dependsOn test
+}
+
 test {
 	systemProperty 'spring.profiles.active', 'test'
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
 
 tasks.register("copyOpenApiToResources", Copy) {
