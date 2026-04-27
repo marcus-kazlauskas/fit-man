@@ -107,15 +107,19 @@ public class ActivityServiceTests {
 
     @Test
     void shouldGetTrackInRange() {
+        var activity = ActivityFixtures.createNewActivity();
+        activity.addRecord(ActivityFixtures.createRecordWithNullLat());
+        activity.addRecord(ActivityFixtures.createRecordWithNullLong());
+
         Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
-        )).thenReturn(List.of(ActivityFixtures.createNewActivity()));
+        )).thenReturn(List.of(activity));
 
-        var activity = activityService.getTrackInRange(
+        var track = activityService.getTrackInRange(
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
         );
 
-        assertThat(activity).isNotNull();
+        assertThat(track).isNotNull();
     }
 
     @Test

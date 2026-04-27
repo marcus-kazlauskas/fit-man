@@ -37,4 +37,28 @@ public final class ActivityFixtures {
 
         return activity;
     }
+
+    public static Record createRecordWithNullLat() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
+        record.setPositionLat(null);
+        record.setPositionLong(49.1221);
+        record.setDistance(12.13F);
+        record.setEnhancedSpeed(4F);
+        record.setEnhancedAltitude(1F);
+        record.setMark((short) 1);
+        return record;
+    }
+
+    public static Record createRecordWithNullLong() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
+        record.setPositionLat(55.7887);
+        record.setPositionLong(null);
+        record.setDistance(12.13F);
+        record.setEnhancedSpeed(4F);
+        record.setEnhancedAltitude(1F);
+        record.setMark((short) 1);
+        return record;
+    }
 }
