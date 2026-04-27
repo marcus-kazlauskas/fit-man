@@ -6,9 +6,6 @@ import fit.man.app.repository.entity.Activity;
 import fit.man.app.util.ActivityUtils;
 import org.mapstruct.Mapper;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @FunctionalInterface
@@ -16,25 +13,13 @@ import java.util.List;
 public interface ActivityMapper {
     ActivityResponse toResponse(Activity activity);
 
-    default OffsetDateTime toOffsetDateTime(String dateTime) {
-        return LocalDateTime.parse(dateTime)
-                .atZone(ZoneId.systemDefault()).toOffsetDateTime();
-    }
-
-    default String toLocalDateTimeString(OffsetDateTime odt) {
-        var adjustedOdt = odt.withOffsetSameInstant(
-                ZoneId.systemDefault().getRules().getOffset(odt.toInstant())
-        );
-        return adjustedOdt.toLocalDateTime().toString();
-    }
-
     default TrackResponse toTrackResponse(Activity activity) {
         var trackResponse = new TrackResponse();
         if (activity == null || activity.getRecords() == null) {
             return trackResponse;
         }
         trackResponse.setStartTime(
-                toLocalDateTimeString(activity.getStartTime())
+                ActivityUtils.toLocalDateTimeString(activity.getStartTime())
         );
         var points = activity.getRecords().stream()
                 .filter(r -> r.getPositionLat() != null &&

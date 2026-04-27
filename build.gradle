@@ -5,6 +5,7 @@ plugins {
 	id 'pmd'
 	id 'org.openapi.generator' version "${openapiGeneratorVersion}"
 	id 'io.freefair.lombok' version "${lombokVersion}"
+	id 'jacoco'
 }
 
 group = 'fit.man'
@@ -35,8 +36,12 @@ dependencies {
 
 	runtimeOnly 'org.postgresql:postgresql'
 
-//	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
-//	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-liquibase-test'
+
+	testRuntimeOnly "com.h2database:h2"
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -63,7 +68,6 @@ openApiGenerate {
 	        "useSpringBoot4": "true",
 			"useJackson3": "true",
 			"openApiNullable": "false",
-			"generateBuilders": "true",
 			"interfaceOnly": "true",
 			"useSpringNullSafety": "false",
 			"additionalModelTypeAnnotations": "@org.jspecify.annotations.NullMarked"
@@ -76,6 +80,27 @@ sourceSets {
 			srcDirs += "$rootDir$apiGenDir/src/main/java"
 		}
 	}
+}
+
+jacocoTestReport {
+	version = "$jacocoVersion"
+	dependsOn test
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, excludes: [
+					'**/api/*Api.class',
+					'**/api/*Util.class',
+					'**/api/model/**',
+					'**/*MapperImpl.class'
+			])
+		}))
+	}
+}
+
+test {
+	systemProperty 'spring.profiles.active', 'test'
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
 
 tasks.register("copyOpenApiToResources", Copy) {
@@ -94,8 +119,4 @@ tasks.named("processResources") {
 
 tasks.named("bootRun") {
 	dependsOn("pmdMain")
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }
