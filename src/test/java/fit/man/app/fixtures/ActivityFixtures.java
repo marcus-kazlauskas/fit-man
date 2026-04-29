@@ -61,4 +61,16 @@ public final class ActivityFixtures {
         record.setMark((short) 1);
         return record;
     }
+
+    public static Record createRecordWithMark0() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
+        record.setPositionLat(55.7887);
+        record.setPositionLong(49.1221);
+        record.setDistance(1213F);
+        record.setEnhancedSpeed(1400F);
+        record.setEnhancedAltitude(1F);
+        record.setMark((short) 0);
+        return record;
+    }
 }

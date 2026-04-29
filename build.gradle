@@ -34,6 +34,8 @@ dependencies {
 
 	implementation "com.garmin:fit:${fitVersion}"
 
+	implementation "net.sf.geographiclib:GeographicLib-Java:$geographicLibVersion"
+
 	runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
@@ -90,8 +92,7 @@ jacocoTestReport {
 			fileTree(dir: it, excludes: [
 					'**/api/*Api.class',
 					'**/api/*Util.class',
-					'**/api/model/**',
-					'**/*MapperImpl.class'
+					'**/api/model/**'
 			])
 		}))
 	}

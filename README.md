@@ -42,8 +42,6 @@ where activity_id = {record.activity_id} and id >= {record.id};
 
 ### TODO
 
-- Tests
 - GitHub Actions workflow
-- Analysis service to throw out corrupted data by speed calculation between points
 - AI to analysis???
 - Authorization???

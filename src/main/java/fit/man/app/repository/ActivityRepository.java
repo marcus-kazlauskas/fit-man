@@ -1,6 +1,7 @@
 package fit.man.app.repository;
 
 import fit.man.app.repository.entity.Activity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
             OffsetDateTime startTimeBegin,
             OffsetDateTime startTimeEnd
     );
+
+    List<Activity> findByMarkedFalse(Pageable pageable);
 }

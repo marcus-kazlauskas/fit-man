@@ -3,8 +3,8 @@ package fit.man.app.service;
 import fit.man.app.advice.exception.ActivityNotFoundException;
 import fit.man.app.advice.exception.FitFileException;
 import fit.man.app.api.model.ActivityResponse;
+import fit.man.app.config.GlobalProperties;
 import fit.man.app.fixtures.ActivityFixtures;
-import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,13 +34,11 @@ import static org.mockito.ArgumentMatchers.any;
         ActivityService.class,
         ActivityMapperImpl.class
 })
+@EnableConfigurationProperties(GlobalProperties.class)
 @SpringJUnitConfig
 public class ActivityServiceTests {
     @Autowired
     private ActivityService activityService;
-
-    @Autowired
-    private ActivityMapper activityMapper;
 
     @MockitoBean
     private ActivityRepository activityRepository;
@@ -110,6 +109,7 @@ public class ActivityServiceTests {
         var activity = ActivityFixtures.createNewActivity();
         activity.addRecord(ActivityFixtures.createRecordWithNullLat());
         activity.addRecord(ActivityFixtures.createRecordWithNullLong());
+        activity.addRecord(ActivityFixtures.createRecordWithMark0());
 
         Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
