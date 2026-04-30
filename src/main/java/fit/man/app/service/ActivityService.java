@@ -161,7 +161,7 @@ public class ActivityService {
         }
     }
 
-    public void analyseActivities() {
+    public void analyzeActivities() {
         var rq = PageRequest.of(
                 0,
                 globalProperties.activityScheduler().batchSize(),
@@ -169,5 +169,38 @@ public class ActivityService {
         );
         var activities = activityRepository.findByMarkedFalse(rq);
         log.atInfo().log("{} activities selected for analysis", activities.size());
+
+        for (var activity : activities) {
+            analyzeAnSave(activity);
+        }
+    }
+
+    private void analyzeAnSave(Activity activity) {
+        var records = activity.getRecords();
+        var i = 0;
+        var j = 1;
+        while (j < records.size()) {
+            var rec1 = records.get(i);
+            var rec1isNull = ActivityUtils.positionIsNull(rec1);
+            var rec2 = records.get(j);
+            var rec2isNull = ActivityUtils.positionIsNull(rec2);
+
+            if (rec1isNull) {
+                rec1.setMark(ActivityUtils.MARK_DISABLED);
+                i++;
+            } else if (rec2isNull || speedIsTooHigh(rec1, rec2)) {
+                rec2.setMark(ActivityUtils.MARK_DISABLED);
+            } else {
+                i = j;
+            }
+            j++;
+        }
+        activity.setMarked(true);
+        activityRepository.save(activity);
+        log.atInfo().log("Saved analyzed activity {}", activity);
+    }
+
+    public boolean speedIsTooHigh(Record rec1, Record rec2) {
+        return ActivityUtils.calcSpeed(rec1, rec2) > globalProperties.activityScheduler().maxSpeed();
     }
 }

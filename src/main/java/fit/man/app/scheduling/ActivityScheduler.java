@@ -12,6 +12,6 @@ public class ActivityScheduler {
 
     @Scheduled(fixedRateString = "${fit-man.activity-scheduler.fixed-rate:PT1M}")
     public void runTrackAnalysis() {
-        activityService.analyseActivities();
+        activityService.analyzeActivities();
     }
 }
