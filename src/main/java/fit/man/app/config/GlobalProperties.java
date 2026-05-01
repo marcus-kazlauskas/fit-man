@@ -11,4 +11,14 @@ public record GlobalProperties(
             int batchSize,
             float maxSpeed
     ) {}
+
+    public GlobalProperties {
+        if (activityScheduler == null) {
+            activityScheduler = new ActivityScheduler(
+                    "PT1M",
+                    1,
+                    60
+            );
+        }
+    }
 }

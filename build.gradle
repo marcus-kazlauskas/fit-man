@@ -50,7 +50,6 @@ dependencies {
 
 pmdMain {
 	consoleOutput = true
-	version = "$pmdVersion"
 	rulesMinimumPriority = 5
 	ruleSets = []
 	ruleSetFiles = files("$rootDir$rulesetFile")
@@ -85,14 +84,14 @@ sourceSets {
 }
 
 jacocoTestReport {
-	version = "$jacocoVersion"
 	dependsOn test
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, excludes: [
 					'**/api/*Api.class',
 					'**/api/*Util.class',
-					'**/api/model/**'
+					'**/api/model/**',
+					'**/*MapperImpl.class'
 			])
 		}))
 	}

@@ -171,11 +171,11 @@ public class ActivityService {
         log.atInfo().log("{} activities selected for analysis", activities.size());
 
         for (var activity : activities) {
-            analyzeAnSave(activity);
+            analyzeAndSave(activity);
         }
     }
 
-    private void analyzeAnSave(Activity activity) {
+    private void analyzeAndSave(Activity activity) {
         var records = activity.getRecords();
         var i = 0;
         var j = 1;
