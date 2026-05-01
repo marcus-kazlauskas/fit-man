@@ -34,6 +34,8 @@ dependencies {
 
 	implementation "com.garmin:fit:${fitVersion}"
 
+	implementation "net.sf.geographiclib:GeographicLib-Java:$geographicLibVersion"
+
 	runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
@@ -48,7 +50,6 @@ dependencies {
 
 pmdMain {
 	consoleOutput = true
-	version = "$pmdVersion"
 	rulesMinimumPriority = 5
 	ruleSets = []
 	ruleSetFiles = files("$rootDir$rulesetFile")
@@ -83,7 +84,6 @@ sourceSets {
 }
 
 jacocoTestReport {
-	version = "$jacocoVersion"
 	dependsOn test
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {

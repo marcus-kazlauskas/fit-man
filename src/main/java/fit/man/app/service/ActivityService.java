@@ -12,6 +12,7 @@ import fit.man.app.advice.exception.ActivityNotFoundException;
 import fit.man.app.advice.exception.FitFileException;
 import fit.man.app.api.model.ActivityResponse;
 import fit.man.app.api.model.TrackResponse;
+import fit.man.app.config.GlobalProperties;
 import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
@@ -19,6 +20,8 @@ import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
+    private final GlobalProperties globalProperties;
 
     public Activity readFitFile(InputStream is) {
         final var activity = new Activity();
@@ -142,7 +146,7 @@ public class ActivityService {
         return getTrackInRange(start, end);
     }
 
-    public TrackResponse getTrackInRange(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd) {
+    private TrackResponse getTrackInRange(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd) {
         try {
             var track = activityMapper.toTrackResponse(
                     activityRepository.findByStartTimeBetweenOrderByStartTime(
@@ -155,5 +159,48 @@ public class ActivityService {
             log.atWarn().log("No activity with startTime from {} to {}", startTimeBegin, startTimeEnd);
             throw new ActivityNotFoundException("No activity with startTime specified", e);
         }
+    }
+
+    public void analyzeActivities() {
+        var rq = PageRequest.of(
+                0,
+                globalProperties.activityScheduler().batchSize(),
+                Sort.by("startTime")
+        );
+        var activities = activityRepository.findByMarkedFalse(rq);
+        log.atInfo().log("{} activities selected for analysis", activities.size());
+
+        for (var activity : activities) {
+            analyzeAndSave(activity);
+        }
+    }
+
+    private void analyzeAndSave(Activity activity) {
+        var records = activity.getRecords();
+        var i = 0;
+        var j = 1;
+        while (j < records.size()) {
+            var rec1 = records.get(i);
+            var rec1isNull = ActivityUtils.positionIsNull(rec1);
+            var rec2 = records.get(j);
+            var rec2isNull = ActivityUtils.positionIsNull(rec2);
+
+            if (rec1isNull) {
+                rec1.setMark(ActivityUtils.MARK_DISABLED);
+                i++;
+            } else if (rec2isNull || speedIsTooHigh(rec1, rec2)) {
+                rec2.setMark(ActivityUtils.MARK_DISABLED);
+            } else {
+                i = j;
+            }
+            j++;
+        }
+        activity.setMarked(true);
+        activityRepository.save(activity);
+        log.atInfo().log("Saved analyzed activity {}", activity);
+    }
+
+    public boolean speedIsTooHigh(Record rec1, Record rec2) {
+        return ActivityUtils.calcSpeed(rec1, rec2) > globalProperties.activityScheduler().maxSpeed();
     }
 }

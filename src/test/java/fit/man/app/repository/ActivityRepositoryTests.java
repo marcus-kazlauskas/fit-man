@@ -28,7 +28,7 @@ public class ActivityRepositoryTests {
         var savedActivity = activityRepository.save(activity);
 
         assertThat(savedActivity.getId()).isNotNegative();
-        assertThat(savedActivity.getRecords()).isNotNull();
+        assertThat(savedActivity.getRecords()).isNotEmpty();
         assertThat(savedActivity.getRecords().getFirst()).isNotNull();
     }
 

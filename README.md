@@ -10,6 +10,8 @@ Openapi description in [openapi-fit-man.yaml](api/openapi-fit-man.yaml).
 
 ### Runtime
 
+Requirements: Java 25, Podman Desktop
+
 Local environment:
 
 ```shell
@@ -42,8 +44,7 @@ where activity_id = {record.activity_id} and id >= {record.id};
 
 ### TODO
 
-- Tests
+- New total distance and average speed estimation during analysis
 - GitHub Actions workflow
-- Analysis service to throw out corrupted data by speed calculation between points
 - AI to analysis???
 - Authorization???

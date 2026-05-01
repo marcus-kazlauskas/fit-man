@@ -61,4 +61,52 @@ public final class ActivityFixtures {
         record.setMark((short) 1);
         return record;
     }
+
+    public static Record createRecordWithMark0() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
+        record.setPositionLat(55.7887);
+        record.setPositionLong(49.1221);
+        record.setDistance(1213F);
+        record.setEnhancedSpeed(1400F);
+        record.setEnhancedAltitude(1F);
+        record.setMark((short) 0);
+        return record;
+    }
+
+    public static Record createRecord1() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:12:00"));
+        record.setPositionLat(55.7887);
+        record.setPositionLong(49.1221);
+        record.setDistance(12.13F);
+        record.setEnhancedSpeed(4F);
+        record.setEnhancedAltitude(1F);
+        record.setMark((short) 1);
+        return record;
+    }
+
+    public static Record createRecordWithFarPos() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:15:00"));
+        record.setPositionLat(55.8387);
+        record.setPositionLong(49.1721);
+        record.setDistance(6644F);
+        record.setEnhancedSpeed(132.88F);
+        record.setEnhancedAltitude(2F);
+        record.setMark((short) 1);
+        return record;
+    }
+
+    public static Record createRecord2() {
+        var record = new Record();
+        record.setPositionTime(LocalDateTime.parse("2026-04-24T13:25:00"));
+        record.setPositionLat(55.8887);
+        record.setPositionLong(49.2221);
+        record.setDistance(6644F);
+        record.setEnhancedSpeed(13.3F);
+        record.setEnhancedAltitude(3F);
+        record.setMark((short) 1);
+        return record;
+    }
 }

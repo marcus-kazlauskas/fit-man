@@ -1,8 +1,13 @@
 package fit.man.app;
 
+import fit.man.app.config.GlobalProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableConfigurationProperties(GlobalProperties.class)
+@EnableScheduling
 @SpringBootApplication
 public class AppApplication {
 

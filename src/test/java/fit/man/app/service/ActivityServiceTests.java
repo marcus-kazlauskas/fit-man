@@ -3,8 +3,8 @@ package fit.man.app.service;
 import fit.man.app.advice.exception.ActivityNotFoundException;
 import fit.man.app.advice.exception.FitFileException;
 import fit.man.app.api.model.ActivityResponse;
+import fit.man.app.config.GlobalProperties;
 import fit.man.app.fixtures.ActivityFixtures;
-import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
@@ -13,14 +13,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,13 +36,11 @@ import static org.mockito.ArgumentMatchers.any;
         ActivityService.class,
         ActivityMapperImpl.class
 })
+@EnableConfigurationProperties(GlobalProperties.class)
 @SpringJUnitConfig
 public class ActivityServiceTests {
     @Autowired
     private ActivityService activityService;
-
-    @Autowired
-    private ActivityMapper activityMapper;
 
     @MockitoBean
     private ActivityRepository activityRepository;
@@ -70,7 +71,7 @@ public class ActivityServiceTests {
                 () -> assertEquals("Cannondale App", activity.getDeviceName()),
                 () -> assertFalse(activity.isMarked())
         );
-        assertThat(activity.getRecords()).isNotNull();
+        assertThat(activity.getRecords()).isNotEmpty();
         var record = activity.getRecords().getFirst();
         Assertions.assertAll(
                 () -> assertEquals(LocalDateTime.parse("2025-07-04T23:59:50.000"), record.getPositionTime()),
@@ -93,7 +94,7 @@ public class ActivityServiceTests {
 
         assertThat(response).isNotNull();
         assertThat(response.getStartTime()).isEqualTo(ActivityFixtures.START_TIME);
-        assertThat(response.getRecords()).isNotNull();
+        assertThat(response.getRecords()).isNotEmpty();
     }
 
     @Test
@@ -110,6 +111,7 @@ public class ActivityServiceTests {
         var activity = ActivityFixtures.createNewActivity();
         activity.addRecord(ActivityFixtures.createRecordWithNullLat());
         activity.addRecord(ActivityFixtures.createRecordWithNullLong());
+        activity.addRecord(ActivityFixtures.createRecordWithMark0());
 
         Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
@@ -119,7 +121,7 @@ public class ActivityServiceTests {
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
         );
 
-        assertThat(track).isNotNull();
+        assertThat(track.getPoints()).isNotEmpty().hasSize(1);
     }
 
     @Test
@@ -131,5 +133,36 @@ public class ActivityServiceTests {
         assertThatThrownBy(() -> activityService.getTrackInRange(
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
         )).isInstanceOf(ActivityNotFoundException.class);
+    }
+
+    @Test
+    void shouldAnalyzeActivity() {
+        var activity = ActivityFixtures.createNewActivity();
+        activity.setRecords(new ArrayList<>());
+        activity.addRecord(ActivityFixtures.createRecordWithNullLat());
+        activity.addRecord(ActivityFixtures.createRecordWithNullLong());
+        activity.addRecord(ActivityFixtures.createRecord1());
+        activity.addRecord(ActivityFixtures.createRecordWithFarPos());
+        activity.addRecord(ActivityFixtures.createRecordWithNullLat());
+        activity.addRecord(ActivityFixtures.createRecordWithNullLong());
+        activity.addRecord(ActivityFixtures.createRecord2());
+        activity.addRecord(ActivityFixtures.createRecord2());
+
+        Mockito.when(activityRepository.findByMarkedFalse(
+                any(PageRequest.class)
+        )).thenReturn(List.of(activity));
+
+        activityService.analyzeActivities();
+
+        Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
+                any(OffsetDateTime.class), any(OffsetDateTime.class)
+        )).thenReturn(List.of(activity));
+
+        var track = activityService.getTrackInRange(
+                "2026-04-26T13:12:00", "2026-04-26T13:12:00"
+        );
+
+        assertThat(track).isNotNull();
+        assertThat(track.getPoints()).isNotEmpty().hasSize(3);
     }
 }
