@@ -48,7 +48,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-pmdMain {
+pmd {
 	consoleOutput = true
 	rulesMinimumPriority = 5
 	ruleSets = []
@@ -83,17 +83,34 @@ sourceSets {
 	}
 }
 
+def jacocoExcludes = [
+		'**/api/*Api.class',
+		'**/api/*Util.class',
+		'**/api/model/**',
+		'**/*MapperImpl.class'
+]
+
 jacocoTestReport {
 	dependsOn test
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, excludes: [
-					'**/api/*Api.class',
-					'**/api/*Util.class',
-					'**/api/model/**',
-					'**/*MapperImpl.class'
-			])
-		}))
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, exclude: jacocoExcludes)
+	}))
+	finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, exclude: jacocoExcludes)
+	}))
+	violationRules {
+		rule {
+			element = 'BUNDLE'
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80
+			}
+		}
 	}
 }
 
@@ -101,6 +118,10 @@ test {
 	systemProperty 'spring.profiles.active', 'test'
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
+}
+
+check {
+	dependsOn jacocoTestReport
 }
 
 tasks.register("copyOpenApiToResources", Copy) {

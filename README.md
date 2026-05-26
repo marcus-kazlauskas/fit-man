@@ -31,6 +31,12 @@ Paths relative to `localhost:8080`:
 - `/swagger-ui/index.html` - upload .fit file
 - `/map` - view track
 
+Scheduled jobs:
+
+- runTrackAnalysis()
+
+Track examples are [here](src/test/resources/files)
+
 ### Manual fix of the corrupted track:
 
 If you see that the end of the track has irrelevant points, you can find `record.activity_id` of the activity shown
