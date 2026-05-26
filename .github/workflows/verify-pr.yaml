@@ -17,7 +17,7 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
-      - name: Build and Test with Gradle
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: build
+      - name: Build and Run Tests with Coverage Check
+        run: ./gradlew build
