@@ -1,82 +1,128 @@
 <!DOCTYPE html>
 <html xmlns:th="http://thymeleaf.org" lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>Activity Track Points</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        html, body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
         #map {
             flex-grow: 1;
-            width: 100%;
+            height: 100%;
         }
-        .track-control {
-            background: white;
+
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .centered-label {
+            display: block;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        input[type="datetime-local"],
+        input[type="text"] {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
             padding: 10px;
             border-radius: 4px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-        }
-        .track-control input {
-            display: block;
-            padding: 0px;
-            margin-bottom: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        .track-control button {
-            width: 100%;
             cursor: pointer;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
         }
-        .track-control button:hover {
-            background-color: #f4f4f4;
+
+        .search-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <script th:inline="javascript">
+    <div class="main-container">
+        <div id="map"></div>
+
+        <div class="sidebar">
+            <h3>Activity 🌟</h3>
+            <div class="form-group">
+                <label for="startTimeBegin">Start time from:</label>
+                <input type="datetime-local" id="startTimeBegin"/>
+
+                <label for="startTimeEnd">Start time to:</label>
+                <input type="datetime-local" id="startTimeEnd"/>
+            </div>
+            <button class="search-btn" onclick="loadTrack()">Find track</button>
+            <div class="centered-label">
+                <label>🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲</label>
+            </div>
+            <div class="form-group">
+                <label for="trackStartTime">Start time:</label>
+                <input type="text" id="trackStartTime" readonly placeholder="...">
+
+                <label for="trackDistance">Distance:</label>
+                <input type="text" id="trackDistance" readonly placeholder="...">
+
+                <label for="trackAvgSpeed">Average speed:</label>
+                <input type="text" id="trackAvgSpeed" readonly placeholder="...">
+            </div>
+        </div>
+    </div>
+    <script>
         const map = L.map('map').setView([55.7887, 49.1221], 12);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        const trackControl = L.control({ position: 'topright' });
-        trackControl.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'track-control leaflet-bar');
-
-            div.innerHTML = `
-                <label>StartTime from:</label>
-                <input type="datetime-local" id="startTimeBegin">
-
-                <label>StartTime to:</label>
-                <input type="datetime-local" id="startTimeEnd">
-
-                <button id="showTrackBtn">Find track</button>
-
-                <label>Track startTime:</label>
-                <input type="text" id="trackStartTime" readonly placeholder="..." style="">
-            `;
-
-            const btn = div.querySelector('#showTrackBtn');
-            btn.addEventListener('click', loadTrack); 
-
-            L.DomEvent.disableClickPropagation(div);
-            L.DomEvent.disableScrollPropagation(div);
-
-            return div;
-        };
-        trackControl.addTo(map);
+        L.control.scale({
+            metric: true,
+            imperial: false,
+            position: 'bottomleft'
+        }).addTo(map);
 
         window.markerGroup = L.layerGroup().addTo(map);
 
@@ -120,13 +166,13 @@
 
                 L.circleMarker(startPoint, {
                     radius: 4,
-                    color: 'green', 
+                    color: 'green',
                     fillOpacity: 0.65
                 }).addTo(window.markerGroup);
-                
+
                 L.circleMarker(finishPoint, {
                     radius: 4,
-                    color: 'red', 
+                    color: 'red',
                     fillOpacity: 0.65
                 }).addTo(window.markerGroup);
 
@@ -143,3 +189,4 @@
         }
     </script>
 </body>
+</html>

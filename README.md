@@ -36,21 +36,3 @@ Scheduled jobs:
 - runTrackAnalysis()
 
 Track examples are [here](src/test/resources/files)
-
-### Manual fix of the corrupted track:
-
-If you see that the end of the track has irrelevant points, you can find `record.activity_id` of the activity shown
-and estimate `record.id` in DB. Execute the similar query:
-
-```
-update record
-set mark = 0
-where activity_id = {record.activity_id} and id >= {record.id};
-```
-
-### TODO
-
-- New total distance and average speed estimation during analysis
-- GitHub Actions workflow
-- AI to analysis???
-- Authorization???
