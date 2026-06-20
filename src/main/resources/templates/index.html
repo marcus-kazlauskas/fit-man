@@ -28,7 +28,7 @@
         }
 
         .sidebar {
-            width: 250px;
+            width: 240px;
             background-color: #f8f9fa;
             border-left: 1px solid #dee2e6;
             padding: 20px;
@@ -58,8 +58,8 @@
 
         input[type="datetime-local"],
         input[type="text"] {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            padding: 8px;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            padding: 4px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
@@ -95,7 +95,9 @@
                 <label for="startTimeEnd">Start time to:</label>
                 <input type="datetime-local" id="startTimeEnd"/>
             </div>
+
             <button class="search-btn" onclick="loadTrack()">Find track</button>
+
             <div class="centered-label">
                 <label>🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲</label>
             </div>
@@ -103,8 +105,14 @@
                 <label for="trackStartTime">Start time:</label>
                 <input type="text" id="trackStartTime" readonly placeholder="...">
 
-                <label for="trackDistance">Distance:</label>
-                <input type="text" id="trackDistance" readonly placeholder="...">
+                <label for="trackTotalElapsedTime">Total elapsed time:</label>
+                <input type="text" id="trackTotalElapsedTime" readonly placeholder="...">
+
+                <label for="trackTotalDistance">Total distance:</label>
+                <input type="text" id="trackTotalDistance" readonly placeholder="...">
+
+                <label for="trackMovingTime">Moving time:</label>
+                <input type="text" id="trackMovingTime" readonly placeholder="...">
 
                 <label for="trackAvgSpeed">Average speed:</label>
                 <input type="text" id="trackAvgSpeed" readonly placeholder="...">
@@ -137,13 +145,49 @@
 
             const response = await fetch(`/track/points?startTimeBegin=${begin}&startTimeEnd=${end}`);
             const track = await response.json();
+
             const startTime = track.startTime;
+            const totalElapsedTime = track.totalElapsedTime;
+            const totalDistance = track.totalDistance;
+            const movingTime = track.movingTime;
+            const averageSpeed = track.averageSpeed;
             const points = track.points;
 
             if (startTime) {
-                trackStartTime.value = startTime;
+                trackStartTime.value = new Date(startTime).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
             } else {
                 trackStartTime.value = "...";
+            }
+
+            if (totalElapsedTime) {
+                trackTotalElapsedTime.value = new Date(totalElapsedTime * 1000).toISOString().slice(11, 19);
+            } else {
+                trackTotalElapsedTime.value = "...";
+            }
+
+            if (totalDistance) {
+                trackTotalDistance.value = `${(totalDistance / 1000).toFixed(2)} km`;
+            } else {
+                trackTotalDistance.value = "...";
+            }
+
+            if (movingTime) {
+                trackMovingTime.value = new Date(movingTime * 1000).toISOString().slice(11, 19);
+            } else {
+                trackMovingTime.value = "...";
+            }
+
+            if (averageSpeed) {
+                trackAvgSpeed.value = `${Number(averageSpeed).toFixed(2)} km/h`;
+            } else {
+                trackAvgSpeed.value = "...";
             }
 
             if (points && points.length > 0) {

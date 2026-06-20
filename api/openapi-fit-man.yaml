@@ -207,6 +207,26 @@ components:
           description: Start date of the activity
           type: string
           example: "2026-04-01T13:12:00.000"
+        totalElapsedTime:
+          description: Total elapsed time
+          type: integer
+          format: int64
+          example: 666
+        totalDistance:
+          description: Total distance
+          type: number
+          format: float
+          example: 1.80
+        movingTime:
+          description: Moving time
+          type: integer
+          format: int64
+          example: 333
+        averageSpeed:
+          description: Average speed
+          type: number
+          format: float
+          example: 19.46
         points:
           $ref: "#/components/schemas/TrackPoints"
     TrackPoints:
