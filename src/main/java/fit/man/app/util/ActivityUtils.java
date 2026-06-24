@@ -12,6 +12,9 @@ import java.time.ZoneId;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ActivityUtils {
+    public static final String ACTIVITY_TABLE = "activity";
+    public static final String ACTIVITY_TABLE_ID = "activity_id";
+
     public static final int MILLIS = 1000;
     public static final double DECIMAL_DEGREES = 180.0 / Math.pow(2, 31);
     public static final double KM_PER_HOUR = 3.6;

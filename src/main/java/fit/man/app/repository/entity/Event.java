@@ -23,37 +23,24 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @ToString
 @Entity
-@Table(name = "record")
-public class Record {
+@Table(name = "event")
+public class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_gen")
-    @SequenceGenerator(name = "record_gen", sequenceName = "record_seq", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_gen")
+    @SequenceGenerator(name = "event_gen", sequenceName = "event_seq", allocationSize = 50)
     @Column(name = "id", nullable = false)
     private long id;
 
-    @Column(name = "position_time")
-    private LocalDateTime positionTime;
+    @Column(name = "event_time")
+    private LocalDateTime eventTime;
 
-    @Column(name = "position_lat")
-    private Double positionLat;
+    @Column(name = "event_name")
+    private String eventName;
 
-    @Column(name = "position_long")
-    private Double positionLong;
-
-    @Column(name = "distance")
-    private Float distance;
-
-    @Column(name = "enhanced_speed")
-    private Float enhancedSpeed;
-
-    @Column(name = "enhanced_altitude")
-    private Float enhancedAltitude;
-
-    @Column(name = "mark")
-    private Short mark;
+    @Column(name = "event_type")
+    private String eventType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)
-    @ToString.Exclude
     private Activity activity;
 }

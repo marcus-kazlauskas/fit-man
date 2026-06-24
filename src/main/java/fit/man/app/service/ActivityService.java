@@ -3,6 +3,7 @@ package fit.man.app.service;
 import com.garmin.fit.ActivityMesg;
 import com.garmin.fit.Decode;
 import com.garmin.fit.DeviceInfoMesg;
+import com.garmin.fit.EventMesg;
 import com.garmin.fit.MesgBroadcaster;
 import com.garmin.fit.RecordMesg;
 import com.garmin.fit.SessionMesg;
@@ -16,6 +17,7 @@ import fit.man.app.config.GlobalProperties;
 import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
+import fit.man.app.repository.entity.Event;
 import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
@@ -109,6 +111,17 @@ public class ActivityService {
             record.setEnhancedAltitude(mesg.getEnhancedAltitude());
             record.setMark(ActivityUtils.MARK_DEFAULT);
             activity.addRecord(record);
+        });
+
+        broadcaster.addListener((EventMesg mesg) -> {
+            var event = new Event();
+            var eventTimeUtc = mesg.getTimestamp().getDate().toInstant()
+                    .atOffset(ZoneOffset.UTC)
+                    .toLocalDateTime();
+            event.setEventTime(eventTimeUtc);
+            event.setEventName(mesg.getEvent().name());
+            event.setEventType(mesg.getEventType().name());
+            activity.addEvent(event);
         });
 
         try {
