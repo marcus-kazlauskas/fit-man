@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -113,9 +114,9 @@ public class ActivityServiceTests {
         activity.addRecord(ActivityFixtures.createRecordWithNullLong());
         activity.addRecord(ActivityFixtures.createRecordWithMark0());
 
-        Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
+        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
-        )).thenReturn(List.of(activity));
+        )).thenReturn(Optional.of(activity));
 
         var track = activityService.getTrackInRange(
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
@@ -126,9 +127,9 @@ public class ActivityServiceTests {
 
     @Test
     void shouldThrowExceptionWhenActivityNotFound() {
-        Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
+        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
-        )).thenReturn(List.of());
+        )).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> activityService.getTrackInRange(
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
@@ -136,7 +137,7 @@ public class ActivityServiceTests {
     }
 
     @Test
-    void shouldAnalyzeActivity() {
+    void shouldMarkActivity() {
         var activity = ActivityFixtures.createNewActivity();
         activity.setRecords(new ArrayList<>());
         activity.addRecord(ActivityFixtures.createRecordWithNullLat());
@@ -152,11 +153,11 @@ public class ActivityServiceTests {
                 any(PageRequest.class)
         )).thenReturn(List.of(activity));
 
-        activityService.analyzeActivities();
+        activityService.markActivities();
 
-        Mockito.when(activityRepository.findByStartTimeBetweenOrderByStartTime(
+        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
-        )).thenReturn(List.of(activity));
+        )).thenReturn(Optional.of(activity));
 
         var track = activityService.getTrackInRange(
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"

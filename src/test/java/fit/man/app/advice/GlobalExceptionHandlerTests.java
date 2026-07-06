@@ -16,7 +16,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.InputStream;
-import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,7 +53,7 @@ public class GlobalExceptionHandlerTests {
     @Test
     void shouldHandleActivityNotFoundException() throws Exception {
         Mockito.when(activityService.getTrackInRange(anyString(), anyString()))
-                .thenThrow(new ActivityNotFoundException("", new NoSuchElementException()));
+                .thenThrow(new ActivityNotFoundException(""));
 
         mockMvc.perform(get("/track/points")
                 .param("startTimeBegin", "2025-07-05T02:00:00")

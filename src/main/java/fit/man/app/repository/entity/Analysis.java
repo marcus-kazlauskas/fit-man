@@ -31,10 +31,6 @@ public class Analysis {
     @Column(name = "id", nullable = false)
     private long id;
 
-    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
-    @Column(name = "total_elapsed_time")
-    private Duration totalElapsedTime;
-
     @Column(name = "total_distance")
     private Float totalDistance;
 

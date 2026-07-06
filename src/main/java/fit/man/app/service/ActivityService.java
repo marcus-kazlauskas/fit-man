@@ -160,35 +160,31 @@ public class ActivityService {
     }
 
     private TrackResponse getTrackInRange(OffsetDateTime startTimeBegin , OffsetDateTime startTimeEnd) {
-        try {
-            var track = activityMapper.toTrackResponse(
-                    activityRepository.findByStartTimeBetweenOrderByStartTime(
-                            startTimeBegin, startTimeEnd
-                    ).getFirst()
-            );
+        var track = activityRepository.findFirstByStartTimeBetweenOrderByStartTime(startTimeBegin, startTimeEnd);
+        if (track.isPresent()) {
             log.atInfo().log("Read track {}", track);
-            return track;
-        } catch (RuntimeException e) {
+            return activityMapper.toTrackResponse(track.get());
+        } else {
             log.atWarn().log("No activity with startTime from {} to {}", startTimeBegin, startTimeEnd);
-            throw new ActivityNotFoundException("No activity with startTime specified", e);
+            throw new ActivityNotFoundException("No activity with startTime specified");
         }
     }
 
-    public void analyzeActivities() {
+    public void markActivities() {
         var rq = PageRequest.of(
                 0,
                 globalProperties.activityScheduler().batchSize(),
                 Sort.by("startTime")
         );
         var activities = activityRepository.findByMarkedFalse(rq);
-        log.atInfo().log("{} activities selected for analysis", activities.size());
+        log.atInfo().log("{} activities selected for markup", activities.size());
 
         for (var activity : activities) {
-            analyzeAndSave(activity);
+            markAndSave(activity);
         }
     }
 
-    private void analyzeAndSave(Activity activity) {
+    private void markAndSave(Activity activity) {
         var records = activity.getRecords();
         var i = 0;
         var j = 1;
@@ -210,7 +206,7 @@ public class ActivityService {
         }
         activity.setMarked(true);
         activityRepository.save(activity);
-        log.atInfo().log("Saved analyzed activity {}", activity);
+        log.atInfo().log("Saved marked up activity {}", activity);
     }
 
     public boolean speedIsTooHigh(Record rec1, Record rec2) {

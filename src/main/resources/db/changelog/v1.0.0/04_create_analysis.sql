@@ -3,7 +3,6 @@
 --changeset github.com/marcus-kazlauskas:1
 create table if not exists analysis (
     id bigint generated always as identity primary key,
-    total_elapsed_time interval day to second,
     total_distance real,
     moving_time interval day to second,
     average_speed real,

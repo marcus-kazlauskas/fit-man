@@ -8,7 +8,7 @@ public class ActivityNotFoundException extends RuntimeException {
 
     private static final String ACTIVITY_NOT_FOUND_EXCEPTION_TEMPLATE = "ACTIVITY_NOT_FOUND_EXCEPTION: %s";
 
-    public ActivityNotFoundException(String message, Throwable cause) {
-        super(ACTIVITY_NOT_FOUND_EXCEPTION_TEMPLATE.formatted(message), cause);
+    public ActivityNotFoundException(String message) {
+        super(ACTIVITY_NOT_FOUND_EXCEPTION_TEMPLATE.formatted(message));
     }
 }

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 public class ActivityScheduler {
     private final ActivityService activityService;
 
-    @Scheduled(fixedRateString = "${fit-man.activity-scheduler.fixed-rate:PT1M}")
-    public void runTrackAnalysis() {
-        activityService.analyzeActivities();
+    @Scheduled(fixedRateString = "${fit-man.activity-markup-scheduler.fixed-rate:PT1M}")
+    public void runTrackMarkup() {
+        activityService.markActivities();
     }
 }

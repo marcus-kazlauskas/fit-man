@@ -13,8 +13,11 @@ spring:
     username: fit-man
     password: fit-man
   jpa:
+#    show-sql: true
     properties:
       hibernate:
+#        format_sql: true
+        default_batch_fetch_size: 50
         jdbc:
           batch_size: 50
         order_inserts: true
@@ -33,7 +36,7 @@ logging:
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG
 fit-man:
-  activity-scheduler:
+  activity-markup-scheduler:
     fixed-rate: PT1M
     batch-size: 1
     max-speed: 60 # km/h
