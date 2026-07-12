@@ -23,9 +23,17 @@ public interface ActivityMapper {
                 ActivityUtils.toLocalDateTimeString(activity.getStartTime())
         );
         trackResponse.setTotalElapsedTime(activity.getTotalElapsedTime().getSeconds());
-        trackResponse.setTotalDistance(activity.getTotalDistance());
-        trackResponse.setMovingTime(activity.getTotalTimerTime().getSeconds());
-        trackResponse.setAverageSpeed(activity.getEnhancedAvgSpeed());
+
+        var analysis = activity.getAnalysis();
+        if (analysis == null || !analysis.isSuccess()) {
+            trackResponse.setTotalDistance(activity.getTotalDistance());
+            trackResponse.setMovingTime(activity.getTotalTimerTime().getSeconds());
+            trackResponse.setAverageSpeed(activity.getEnhancedAvgSpeed());
+        } else {
+            trackResponse.setTotalDistance(analysis.getTotalDistance());
+            trackResponse.setMovingTime(analysis.getMovingTime());
+            trackResponse.setAverageSpeed(analysis.getAverageSpeed());
+        }
 
         var points = activity.getRecords().stream()
                 .filter(r -> r.getPositionLat() != null &&

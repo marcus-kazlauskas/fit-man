@@ -18,3 +18,6 @@ create table if not exists record (
 
 --changeset github.com/marcus-kazlauskas:3
 comment on table record is 'Geo data from Record part of a .fit file';
+
+--changeset github.com/marcus-kazlauskas:4
+create index if not exists activity_id_idx on record (activity_id);

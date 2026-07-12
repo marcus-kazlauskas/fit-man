@@ -14,10 +14,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import java.time.Duration;
 
 @Getter
 @Setter
@@ -34,12 +30,14 @@ public class Analysis {
     @Column(name = "total_distance")
     private Float totalDistance;
 
-    @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     @Column(name = "moving_time")
-    private Duration movingTime;
+    private Long movingTime;
 
     @Column(name = "average_speed")
     private Float averageSpeed;
+
+    @Column(name = "success")
+    private boolean success;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)

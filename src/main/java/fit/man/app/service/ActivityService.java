@@ -13,7 +13,7 @@ import fit.man.app.advice.exception.ActivityNotFoundException;
 import fit.man.app.advice.exception.FitFileException;
 import fit.man.app.api.model.ActivityResponse;
 import fit.man.app.api.model.TrackResponse;
-import fit.man.app.config.GlobalProperties;
+import fit.man.app.config.AppProperties;
 import fit.man.app.mapper.ActivityMapper;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
@@ -22,7 +22,9 @@ import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -41,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final ActivityMapper activityMapper;
-    private final GlobalProperties globalProperties;
+    private final AppProperties appProperties;
 
     public Activity readFitFile(InputStream is) {
         final var activity = new Activity();
@@ -170,46 +173,32 @@ public class ActivityService {
         }
     }
 
-    public void markActivities() {
-        var rq = PageRequest.of(
-                0,
-                globalProperties.activityScheduler().batchSize(),
-                Sort.by("startTime")
-        );
-        var activities = activityRepository.findByMarkedFalse(rq);
-        log.atInfo().log("{} activities selected for markup", activities.size());
+    public List<Activity> findActivitiesForMarkup() {
+        var activities = activityRepository.findByMarkedFalse(getActivityRequest());
 
         for (var activity : activities) {
-            markAndSave(activity);
+            Hibernate.initialize(activity.getRecords());
         }
+        log.atInfo().log("{} activities selected for markup", activities.size());
+        return activities;
     }
 
-    private void markAndSave(Activity activity) {
-        var records = activity.getRecords();
-        var i = 0;
-        var j = 1;
-        while (j < records.size()) {
-            var rec1 = records.get(i);
-            var rec1isNull = ActivityUtils.positionIsNull(rec1);
-            var rec2 = records.get(j);
-            var rec2isNull = ActivityUtils.positionIsNull(rec2);
+    public List<Activity> findActivitiesForAnalysis() {
+        var activities = activityRepository.findByMarkedTrueAndAnalysisIsNull(getActivityRequest());
 
-            if (rec1isNull) {
-                rec1.setMark(ActivityUtils.MARK_DISABLED);
-                i++;
-            } else if (rec2isNull || speedIsTooHigh(rec1, rec2)) {
-                rec2.setMark(ActivityUtils.MARK_DISABLED);
-            } else {
-                i = j;
-            }
-            j++;
+        for (var activity : activities) {
+            Hibernate.initialize(activity.getRecords());
+            Hibernate.initialize(activity.getEvents());
         }
-        activity.setMarked(true);
-        activityRepository.save(activity);
-        log.atInfo().log("Saved marked up activity {}", activity);
+        log.atInfo().log("{} activities selected for analysis", activities.size());
+        return activities;
     }
 
-    public boolean speedIsTooHigh(Record rec1, Record rec2) {
-        return ActivityUtils.calcSpeed(rec1, rec2) > globalProperties.activityScheduler().maxSpeed();
+    private Pageable getActivityRequest() {
+        return PageRequest.of(
+                0,
+                appProperties.activityScheduler().batchSize(),
+                Sort.by("startTime")
+        );
     }
 }

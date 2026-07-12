@@ -1,3 +1,6 @@
+server:
+  tomcat:
+    max-threads: 20
 spring:
   application:
     name: app
@@ -12,6 +15,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/fit-man-db?reWriteBatchedInserts=true
     username: fit-man
     password: fit-man
+    hikari:
+      maximum-pool-size: 10
   jpa:
 #    show-sql: true
     properties:
@@ -36,7 +41,10 @@ logging:
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG
 fit-man:
-  activity-markup-scheduler:
+  activity-scheduler:
     fixed-rate: PT1M
-    batch-size: 1
+    initial-delay: PT30S
+    batch-size: 2
     max-speed: 60 # km/h
+    thread-pool-size: 2
+    timeout: 5 # s

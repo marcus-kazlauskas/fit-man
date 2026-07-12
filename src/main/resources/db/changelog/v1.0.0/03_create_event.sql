@@ -14,3 +14,6 @@ create table if not exists event (
 
 --changeset github.com/marcus-kazlauskas:3
 comment on table event is 'Timer data from Event part of a .fit file';
+
+--changeset github.com/marcus-kazlauskas:4
+create index if not exists activity_id_idx on event (activity_id);
