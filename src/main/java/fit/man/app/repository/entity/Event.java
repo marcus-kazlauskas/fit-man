@@ -42,5 +42,6 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)
+    @ToString.Exclude
     private Activity activity;
 }

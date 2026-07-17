@@ -46,27 +46,35 @@
         }
 
         .centered-label {
-            display: block;
+            display: flex;
             text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .gray-line {
+            display: block;
+            width: 100%;
+            height: 1px;
+            background-color: #cccccc;
         }
 
         label {
             font-weight: bold;
             font-size: 14px;
-            color: #333;
+            color: #333333;
         }
 
         input[type="datetime-local"],
         input[type="text"] {
             font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
             padding: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid #cccccc;
             border-radius: 4px;
             font-size: 14px;
         }
 
         .search-btn {
-            background-color: #007bff;
+            background-color: #0067F4;
             color: white;
             border: none;
             padding: 10px;
@@ -75,10 +83,12 @@
             font-size: 14px;
             font-weight: bold;
             transition: background 0.2s;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .search-btn:hover {
-            background-color: #0056b3;
+            background-color: #0052c2;
         }
     </style>
 </head>
@@ -87,21 +97,20 @@
         <div id="map"></div>
 
         <div class="sidebar">
-            <h3>Activity 🌟</h3>
+            <h3>Activity 🚲</h3>
             <div class="form-group">
                 <label for="startTimeBegin">Start time from:</label>
                 <input type="datetime-local" id="startTimeBegin"/>
 
                 <label for="startTimeEnd">Start time to:</label>
                 <input type="datetime-local" id="startTimeEnd"/>
-            </div>
 
-            <button class="search-btn" onclick="loadTrack()">Find track</button>
+                <button class="search-btn" onclick="loadTrack()">Find track</button>
 
-            <div class="centered-label">
-                <label>🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲 🚲</label>
-            </div>
-            <div class="form-group">
+                <div class="centered-label">
+                    <span class="gray-line"></span>
+                </div>
+
                 <label for="trackStartTime">Start time:</label>
                 <input type="text" id="trackStartTime" readonly placeholder="...">
 
