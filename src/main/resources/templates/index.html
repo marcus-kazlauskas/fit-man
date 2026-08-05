@@ -1,82 +1,145 @@
 <!DOCTYPE html>
 <html xmlns:th="http://thymeleaf.org" lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>Activity Track Points</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        html, body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
         #map {
             flex-grow: 1;
-            width: 100%;
+            height: 100%;
         }
-        .track-control {
-            background: white;
+
+        .sidebar {
+            width: 240px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .centered-label {
+            display: flex;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .gray-line {
+            display: block;
+            width: 100%;
+            height: 1px;
+            background-color: #cccccc;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333333;
+        }
+
+        input[type="datetime-local"],
+        input[type="text"] {
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            padding: 4px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            background-color: #0067F4;
+            color: white;
+            border: none;
             padding: 10px;
             border-radius: 4px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-        }
-        .track-control input {
-            display: block;
-            padding: 0px;
-            margin-bottom: 5px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        .track-control button {
-            width: 100%;
             cursor: pointer;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
-        .track-control button:hover {
-            background-color: #f4f4f4;
+
+        .search-btn:hover {
+            background-color: #0052c2;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <script th:inline="javascript">
+    <div class="main-container">
+        <div id="map"></div>
+
+        <div class="sidebar">
+            <h3>Activity 🚲</h3>
+            <div class="form-group">
+                <label for="startTimeBegin">Start time from:</label>
+                <input type="datetime-local" id="startTimeBegin"/>
+
+                <label for="startTimeEnd">Start time to:</label>
+                <input type="datetime-local" id="startTimeEnd"/>
+
+                <button class="search-btn" onclick="loadTrack()">Find track</button>
+
+                <div class="centered-label">
+                    <span class="gray-line"></span>
+                </div>
+
+                <label for="trackStartTime">Start time:</label>
+                <input type="text" id="trackStartTime" readonly placeholder="...">
+
+                <label for="trackTotalElapsedTime">Total elapsed time:</label>
+                <input type="text" id="trackTotalElapsedTime" readonly placeholder="...">
+
+                <label for="trackTotalDistance">Total distance:</label>
+                <input type="text" id="trackTotalDistance" readonly placeholder="...">
+
+                <label for="trackMovingTime">Moving time:</label>
+                <input type="text" id="trackMovingTime" readonly placeholder="...">
+
+                <label for="trackAvgSpeed">Average speed:</label>
+                <input type="text" id="trackAvgSpeed" readonly placeholder="...">
+            </div>
+        </div>
+    </div>
+    <script>
         const map = L.map('map').setView([55.7887, 49.1221], 12);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        const trackControl = L.control({ position: 'topright' });
-        trackControl.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'track-control leaflet-bar');
-
-            div.innerHTML = `
-                <label>StartTime from:</label>
-                <input type="datetime-local" id="startTimeBegin">
-
-                <label>StartTime to:</label>
-                <input type="datetime-local" id="startTimeEnd">
-
-                <button id="showTrackBtn">Find track</button>
-
-                <label>Track startTime:</label>
-                <input type="text" id="trackStartTime" readonly placeholder="..." style="">
-            `;
-
-            const btn = div.querySelector('#showTrackBtn');
-            btn.addEventListener('click', loadTrack); 
-
-            L.DomEvent.disableClickPropagation(div);
-            L.DomEvent.disableScrollPropagation(div);
-
-            return div;
-        };
-        trackControl.addTo(map);
+        L.control.scale({
+            metric: true,
+            imperial: false,
+            position: 'bottomleft'
+        }).addTo(map);
 
         window.markerGroup = L.layerGroup().addTo(map);
 
@@ -91,13 +154,49 @@
 
             const response = await fetch(`/track/points?startTimeBegin=${begin}&startTimeEnd=${end}`);
             const track = await response.json();
+
             const startTime = track.startTime;
+            const totalElapsedTime = track.totalElapsedTime;
+            const totalDistance = track.totalDistance;
+            const movingTime = track.movingTime;
+            const averageSpeed = track.averageSpeed;
             const points = track.points;
 
             if (startTime) {
-                trackStartTime.value = startTime;
+                trackStartTime.value = new Date(startTime).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
             } else {
                 trackStartTime.value = "...";
+            }
+
+            if (totalElapsedTime) {
+                trackTotalElapsedTime.value = new Date(totalElapsedTime * 1000).toISOString().slice(11, 19);
+            } else {
+                trackTotalElapsedTime.value = "...";
+            }
+
+            if (totalDistance) {
+                trackTotalDistance.value = `${(totalDistance / 1000).toFixed(2)} km`;
+            } else {
+                trackTotalDistance.value = "...";
+            }
+
+            if (movingTime) {
+                trackMovingTime.value = new Date(movingTime * 1000).toISOString().slice(11, 19);
+            } else {
+                trackMovingTime.value = "...";
+            }
+
+            if (averageSpeed) {
+                trackAvgSpeed.value = `${Number(averageSpeed).toFixed(2)} km/h`;
+            } else {
+                trackAvgSpeed.value = "...";
             }
 
             if (points && points.length > 0) {
@@ -120,13 +219,13 @@
 
                 L.circleMarker(startPoint, {
                     radius: 4,
-                    color: 'green', 
+                    color: 'green',
                     fillOpacity: 0.65
                 }).addTo(window.markerGroup);
-                
+
                 L.circleMarker(finishPoint, {
                     radius: 4,
-                    color: 'red', 
+                    color: 'red',
                     fillOpacity: 0.65
                 }).addTo(window.markerGroup);
 
@@ -143,3 +242,4 @@
         }
     </script>
 </body>
+</html>

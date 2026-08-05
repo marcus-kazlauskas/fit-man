@@ -141,7 +141,7 @@ components:
           type: string
           example: Mikhail Kozlov
         deviceName:
-          description: Device Name
+          description: Device name
           type: string
           example: Cannondale App
         marked:
@@ -153,6 +153,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Record"
+        events:
+          description:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
     Record:
       type: object
       required:
@@ -198,6 +203,28 @@ components:
           type: integer
           format: int32
           example: 1
+    Event:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Event ID
+          type: integer
+          format: int64
+          example: 1312
+        eventTime:
+          description: Event time
+          type: string
+          example: "2025-07-05T14:07:18"
+        eventName:
+          description: Event name
+          type: string
+          example: TIMER
+        eventType:
+          description: Event type
+          type: string
+          example: START
     TrackResponse:
       type: object
       required:
@@ -207,6 +234,26 @@ components:
           description: Start date of the activity
           type: string
           example: "2026-04-01T13:12:00.000"
+        totalElapsedTime:
+          description: Total elapsed time
+          type: integer
+          format: int64
+          example: 666
+        totalDistance:
+          description: Total distance
+          type: number
+          format: float
+          example: 1800
+        movingTime:
+          description: Moving time
+          type: integer
+          format: int64
+          example: 333
+        averageSpeed:
+          description: Average speed
+          type: number
+          format: float
+          example: 19.46
         points:
           $ref: "#/components/schemas/TrackPoints"
     TrackPoints:

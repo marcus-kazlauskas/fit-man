@@ -43,13 +43,12 @@ public class ActivityRepositoryTests {
     @Test
     void shouldFindActivityInRange() {
         activityRepository.save(activity);
-        var foundActivity = activityRepository.findByStartTimeBetweenOrderByStartTime(
+        var foundActivity = activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
                 ActivityFixtures.START_TIME.minusMinutes(1),
                 ActivityFixtures.START_TIME.plusMinutes(1)
         );
 
-        assertThat(foundActivity).isNotNull();
-        assertThat(foundActivity).hasSize(1);
-        assertThat(foundActivity.getFirst().getId()).isNotNegative();
+        assertThat(foundActivity).isPresent();
+        assertThat(foundActivity.get().getId()).isNotNegative();
     }
 }

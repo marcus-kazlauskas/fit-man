@@ -5,3 +5,9 @@ databaseChangeLog:
   - include:
       file: v1.0.0/02_create_record.sql
       relativeToChangelogFile: true
+  - include:
+      file: v1.0.0/03_create_event.sql
+      relativeToChangelogFile: true
+  - include:
+      file: v1.0.0/04_create_analysis.sql
+      relativeToChangelogFile: true

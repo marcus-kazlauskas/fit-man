@@ -26,6 +26,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocStarterUi}"
 
@@ -117,6 +118,10 @@ jacocoTestCoverageVerification {
 test {
 	systemProperty 'spring.profiles.active', 'test'
 	useJUnitPlatform()
+	testLogging {
+		showStandardStreams = true
+		events "passed", "skipped", "failed"
+	}
 	finalizedBy jacocoTestReport
 }
 

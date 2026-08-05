@@ -1,6 +1,7 @@
 package fit.man.app.repository.entity;
 
 import com.garmin.fit.Sport;
+import fit.man.app.util.ActivityUtils;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -75,7 +77,7 @@ public class Activity {
     @Column(name = "marked", nullable = false)
     private boolean marked;
 
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @OrderBy("positionTime")
     private List<Record> records = new ArrayList<>();
@@ -83,5 +85,24 @@ public class Activity {
     public void addRecord(Record record) {
         records.add(record);
         record.setActivity(this);
+    }
+
+    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @OrderBy("eventTime")
+    private List<Event> events = new ArrayList<>();
+
+    public void addEvent(Event event) {
+        events.add(event);
+        event.setActivity(this);
+    }
+
+    @OneToOne(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Analysis analysis;
+
+    public void setAnalysis(Analysis analysis) {
+        this.analysis = analysis;
+        analysis.setActivity(this);
     }
 }
