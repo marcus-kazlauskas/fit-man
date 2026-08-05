@@ -8,6 +8,7 @@ import fit.man.app.fixtures.ActivityFixtures;
 import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
+import fit.man.app.util.ActivityUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,15 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +74,7 @@ public class ActivityServiceTests {
         var record = activity.getRecords().getFirst();
         Assertions.assertAll(
                 () -> assertEquals(LocalDateTime.parse("2025-07-04T23:59:50.000"), record.getPositionTime()),
-                () -> assertEquals((short) 1, record.getMark())
+                () -> assertEquals(ActivityUtils.MARK_DEFAULT, record.getMark())
         );
     }
 
@@ -112,7 +110,7 @@ public class ActivityServiceTests {
         var activity = ActivityFixtures.createNewActivity();
         activity.addRecord(ActivityFixtures.createRecordWithNullLat());
         activity.addRecord(ActivityFixtures.createRecordWithNullLong());
-        activity.addRecord(ActivityFixtures.createRecordWithMark0());
+        activity.addRecord(ActivityFixtures.createRecordWithMarkDisabled());
 
         Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
                 any(OffsetDateTime.class), any(OffsetDateTime.class)
@@ -122,7 +120,65 @@ public class ActivityServiceTests {
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
         );
 
-        assertThat(track.getPoints()).isNotEmpty().hasSize(1);
+        assertThat(track).isNotNull();
+        Assertions.assertAll(
+                () -> assertEquals(1, track.getPoints().size()),
+                () -> assertEquals("2026-04-23T13:12", track.getStartTime()),
+                () -> assertEquals(86400, track.getTotalElapsedTime()),
+                () -> assertEquals(13.12F, track.getTotalDistance()),
+                () -> assertEquals(47520, track.getMovingTime()),
+                () -> assertEquals(4F, track.getAverageSpeed())
+        );
+    }
+
+    @Test
+    void shouldGetTrackWithSuccessfulAnalysis() {
+        var activity = ActivityFixtures.createNewActivity();
+        var analysis = ActivityFixtures.createAnalysis();
+        activity.setAnalysis(analysis);
+
+        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
+                any(OffsetDateTime.class), any(OffsetDateTime.class)
+        )).thenReturn(Optional.of(activity));
+
+        var track = activityService.getTrackInRange(
+                "2026-04-26T13:12:00", "2026-04-26T13:12:00"
+        );
+
+        assertThat(track).isNotNull();
+        Assertions.assertAll(
+                () -> assertEquals(1, track.getPoints().size()),
+                () -> assertEquals("2026-04-23T13:12", track.getStartTime()),
+                () -> assertEquals(86400, track.getTotalElapsedTime()),
+                () -> assertEquals(13000F, track.getTotalDistance()),
+                () -> assertEquals(43200L, track.getMovingTime()),
+                () -> assertEquals(1.08F, track.getAverageSpeed())
+        );
+    }
+
+    @Test
+    void shouldGetTrackWithUnsuccessfulAnalysis() {
+        var activity = ActivityFixtures.createNewActivity();
+        var analysis = ActivityFixtures.createUnsuccessfulAnalysis();
+        activity.setAnalysis(analysis);
+
+        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
+                any(OffsetDateTime.class), any(OffsetDateTime.class)
+        )).thenReturn(Optional.of(activity));
+
+        var track = activityService.getTrackInRange(
+                "2026-04-26T13:12:00", "2026-04-26T13:12:00"
+        );
+
+        assertThat(track).isNotNull();
+        Assertions.assertAll(
+                () -> assertEquals(1, track.getPoints().size()),
+                () -> assertEquals("2026-04-23T13:12", track.getStartTime()),
+                () -> assertEquals(86400, track.getTotalElapsedTime()),
+                () -> assertEquals(13.12F, track.getTotalDistance()),
+                () -> assertEquals(47520, track.getMovingTime()),
+                () -> assertEquals(4F, track.getAverageSpeed())
+        );
     }
 
     @Test
@@ -135,36 +191,4 @@ public class ActivityServiceTests {
                 "2026-04-26T13:12:00", "2026-04-26T13:12:00"
         )).isInstanceOf(ActivityNotFoundException.class);
     }
-
-    // TODO
-//    @Test
-//    void shouldMarkActivity() {
-//        var activity = ActivityFixtures.createNewActivity();
-//        activity.setRecords(new ArrayList<>());
-//        activity.addRecord(ActivityFixtures.createRecordWithNullLat());
-//        activity.addRecord(ActivityFixtures.createRecordWithNullLong());
-//        activity.addRecord(ActivityFixtures.createRecord1());
-//        activity.addRecord(ActivityFixtures.createRecordWithFarPos());
-//        activity.addRecord(ActivityFixtures.createRecordWithNullLat());
-//        activity.addRecord(ActivityFixtures.createRecordWithNullLong());
-//        activity.addRecord(ActivityFixtures.createRecord2());
-//        activity.addRecord(ActivityFixtures.createRecord2());
-//
-//        Mockito.when(activityRepository.findByMarkedFalse(
-//                any(PageRequest.class)
-//        )).thenReturn(List.of(activity));
-//
-//        activityService.markActivities();
-//
-//        Mockito.when(activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-//                any(OffsetDateTime.class), any(OffsetDateTime.class)
-//        )).thenReturn(Optional.of(activity));
-//
-//        var track = activityService.getTrackInRange(
-//                "2026-04-26T13:12:00", "2026-04-26T13:12:00"
-//        );
-//
-//        assertThat(track).isNotNull();
-//        assertThat(track.getPoints()).isNotEmpty().hasSize(3);
-//    }
 }

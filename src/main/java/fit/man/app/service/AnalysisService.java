@@ -10,7 +10,6 @@ import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -18,7 +17,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -28,9 +26,6 @@ public class AnalysisService {
     private final ActivityService activityService;
     private final AnalysisRepository analysisRepository;
     private final AppProperties appProperties;
-
-    @Qualifier("analysisExecutor")
-    private final Executor analysisExecutor;
 
     public void runAnalysis() {
         var activities = activityService.findActivitiesForAnalysis();
@@ -47,15 +42,17 @@ public class AnalysisService {
         var events = activity.getEvents();
 
         CompletableFuture<Double> futureTotalDistance = CompletableFuture.supplyAsync(
-                () -> calcTotalDistance(records), analysisExecutor
-        ).orTimeout(appProperties.activityScheduler().timeout(), TimeUnit.SECONDS);
+                () -> calcTotalDistance(records)
+        );
 
         CompletableFuture<Double> futureMovingTime = CompletableFuture.supplyAsync(
-                () -> calcMovingTime(records, events), analysisExecutor
-        ).orTimeout(appProperties.activityScheduler().timeout(), TimeUnit.SECONDS);
+                () -> calcMovingTime(records, events)
+        );
 
         try {
-            CompletableFuture.allOf(futureTotalDistance, futureMovingTime).join();
+            CompletableFuture.allOf(futureTotalDistance, futureMovingTime)
+                    .orTimeout(appProperties.activityScheduler().timeout(), TimeUnit.SECONDS)
+                    .join();
 
             var totalDistance = futureTotalDistance.join();
             var movingTime = futureMovingTime.join();
@@ -73,7 +70,7 @@ public class AnalysisService {
         log.atInfo().log("Saved analysis {}", analysis);
     }
 
-    private double calcTotalDistance(List<Record> records) {
+    public static double calcTotalDistance(List<Record> records) {
         if (records.isEmpty()) {
             return 0f;
         }
@@ -100,7 +97,7 @@ public class AnalysisService {
         return totalDistance;
     }
 
-    private double calcMovingTime(List<Record> records, List<Event> events) {
+    public static double calcMovingTime(List<Record> records, List<Event> events) {
         if (records.isEmpty() || events.isEmpty()) {
             return 0;
         }
@@ -128,10 +125,15 @@ public class AnalysisService {
                     var event = events.get(k);
                     var eventTime = event.getEventTime().truncatedTo(ChronoUnit.SECONDS);
                     var validTime = record1.getPositionTime().truncatedTo(ChronoUnit.SECONDS);
+
+                    while (eventTime.isBefore(validTime)) {
+                        k++;
+                        event = events.get(k);
+                        eventTime = event.getEventTime().truncatedTo(ChronoUnit.SECONDS);
+                    }
+
                     if (eventTime.equals(validTime)) {
                         validEvents.add(event);
-                        k++;
-                    } else if (eventTime.isBefore(validTime)) {
                         k++;
                     }
                 }
