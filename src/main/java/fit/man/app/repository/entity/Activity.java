@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +38,13 @@ public class Activity {
     private long id;
 
     @Column(name = "end_time", nullable = false)
-    private OffsetDateTime endTime = OffsetDateTime.now();
+    private OffsetDateTime endTime;
 
     @Column(name = "start_time", nullable = false)
-    private OffsetDateTime startTime = OffsetDateTime.now();
+    private OffsetDateTime startTime;
 
     @Column(name = "sport", nullable = false)
-    private String sport = Sport.WALKING.name();
+    private String sport;
 
     @JdbcTypeCode(SqlTypes.INTERVAL_SECOND)
     @Column(name = "total_elapsed_time")
@@ -69,10 +70,10 @@ public class Activity {
     private Float enhancedMaxSpeed;
 
     @Column(name = "user_name", nullable = false)
-    private String userName = "Misha";
+    private String userName;
 
     @Column(name = "device_name", nullable = false)
-    private String deviceName = "App";
+    private String deviceName;
 
     @Column(name = "marked", nullable = false)
     private boolean marked;
@@ -104,5 +105,14 @@ public class Activity {
     public void setAnalysis(Analysis analysis) {
         this.analysis = analysis;
         analysis.setActivity(this);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (endTime == null) endTime = OffsetDateTime.now();
+        if (startTime == null) startTime = OffsetDateTime.now();
+        if (sport == null) sport = Sport.WALKING.name();
+        if (userName == null) userName = "Misha";
+        if (deviceName == null) deviceName = "App";
     }
 }
