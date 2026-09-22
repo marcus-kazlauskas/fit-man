@@ -10,6 +10,7 @@ import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -17,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -26,6 +28,9 @@ public class AnalysisService {
     private final ActivityService activityService;
     private final AnalysisRepository analysisRepository;
     private final AppProperties appProperties;
+
+    @Qualifier("analysisExecutor")
+    private final Executor analysisExecutor;
 
     public void runAnalysis() {
         var activities = activityService.findActivitiesForAnalysis();
@@ -42,11 +47,11 @@ public class AnalysisService {
         var events = activity.getEvents();
 
         CompletableFuture<Double> futureTotalDistance = CompletableFuture.supplyAsync(
-                () -> calcTotalDistance(records)
+                () -> calcTotalDistance(records), analysisExecutor
         );
 
         CompletableFuture<Double> futureMovingTime = CompletableFuture.supplyAsync(
-                () -> calcMovingTime(records, events)
+                () -> calcMovingTime(records, events), analysisExecutor
         );
 
         try {
