@@ -28,7 +28,7 @@
         }
 
         .sidebar {
-            width: 240px;
+            width: 250px;
             background-color: #f8f9fa;
             border-left: 1px solid #dee2e6;
             padding: 20px;
@@ -100,10 +100,10 @@
             <h3>Activity 🚲</h3>
             <div class="form-group">
                 <label for="startTimeBegin">Start time from:</label>
-                <input type="datetime-local" id="startTimeBegin"/>
+                <input type="datetime-local" id="startTimeBegin" step="1"/>
 
                 <label for="startTimeEnd">Start time to:</label>
-                <input type="datetime-local" id="startTimeEnd"/>
+                <input type="datetime-local" id="startTimeEnd" step="1"/>
 
                 <button class="search-btn" onclick="loadTrack()">Find track</button>
 

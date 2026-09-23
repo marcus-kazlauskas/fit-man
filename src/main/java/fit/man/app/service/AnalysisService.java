@@ -10,6 +10,7 @@ import fit.man.app.repository.entity.Record;
 import fit.man.app.util.ActivityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -17,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -26,6 +28,9 @@ public class AnalysisService {
     private final ActivityService activityService;
     private final AnalysisRepository analysisRepository;
     private final AppProperties appProperties;
+
+    @Qualifier("analysisExecutor")
+    private final Executor analysisExecutor;
 
     public void runAnalysis() {
         var activities = activityService.findActivitiesForAnalysis();
@@ -42,11 +47,11 @@ public class AnalysisService {
         var events = activity.getEvents();
 
         CompletableFuture<Double> futureTotalDistance = CompletableFuture.supplyAsync(
-                () -> calcTotalDistance(records)
+                () -> calcTotalDistance(records), analysisExecutor
         );
 
         CompletableFuture<Double> futureMovingTime = CompletableFuture.supplyAsync(
-                () -> calcMovingTime(records, events)
+                () -> calcMovingTime(records, events), analysisExecutor
         );
 
         try {
@@ -59,7 +64,9 @@ public class AnalysisService {
 
             analysis.setTotalDistance(totalDistance.floatValue());
             analysis.setMovingTime(movingTime.longValue());
-            analysis.setAverageSpeed((float) (totalDistance / movingTime * ActivityUtils.KM_PER_HOUR));
+            analysis.setAverageSpeed(movingTime > 0
+                    ? (float) (totalDistance / movingTime * ActivityUtils.KM_PER_HOUR)
+                    : 0f);
             analysis.setSuccess(true);
         } catch (RuntimeException e) {
             analysis.setSuccess(false);
@@ -126,7 +133,7 @@ public class AnalysisService {
                     var eventTime = event.getEventTime().truncatedTo(ChronoUnit.SECONDS);
                     var validTime = record1.getPositionTime().truncatedTo(ChronoUnit.SECONDS);
 
-                    while (eventTime.isBefore(validTime)) {
+                    while (k < events.size() - 1 && eventTime.isBefore(validTime)) {
                         k++;
                         event = events.get(k);
                         eventTime = event.getEventTime().truncatedTo(ChronoUnit.SECONDS);
