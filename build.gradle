@@ -1,5 +1,7 @@
 plugins {
 	id 'java'
+	id 'org.jetbrains.kotlin.jvm' version "${kotlinVersion}"
+	id 'org.jetbrains.kotlin.plugin.jpa' version "${kotlinVersion}"
 	id 'org.springframework.boot' version "${springBootVersion}"
 	id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
 	id 'pmd'
@@ -17,11 +19,17 @@ java {
 	}
 }
 
+kotlin {
+	jvmToolchain(Integer.parseInt("$javaVersion"))
+}
+
 repositories {
 	mavenCentral()
 }
 
 dependencies {
+	implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -136,6 +144,10 @@ tasks.register("copyOpenApiToResources", Copy) {
 }
 
 tasks.named("compileJava") {
+	dependsOn("openApiGenerate")
+}
+
+tasks.named("compileKotlin") {
 	dependsOn("openApiGenerate")
 }
 

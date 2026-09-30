@@ -25,7 +25,7 @@ public interface ActivityMapper {
         trackResponse.setTotalElapsedTime(activity.getTotalElapsedTime().getSeconds());
 
         var analysis = activity.getAnalysis();
-        if (analysis == null || !analysis.isSuccess()) {
+        if (analysis == null || !analysis.getSuccess()) {
             trackResponse.setTotalDistance(activity.getTotalDistance());
             trackResponse.setMovingTime(activity.getTotalTimerTime().getSeconds());
             trackResponse.setAverageSpeed(activity.getEnhancedAvgSpeed());

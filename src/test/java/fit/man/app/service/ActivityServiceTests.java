@@ -68,7 +68,7 @@ public class ActivityServiceTests {
                 () -> assertEquals(23.842F, activity.getEnhancedMaxSpeed()),
                 () -> assertEquals("Mikhail Kozlov", activity.getUserName()),
                 () -> assertEquals("Cannondale App", activity.getDeviceName()),
-                () -> assertFalse(activity.isMarked())
+                () -> assertFalse(activity.getMarked())
         );
         assertThat(activity.getRecords()).isNotEmpty();
         var record = activity.getRecords().getFirst();
