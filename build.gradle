@@ -62,29 +62,25 @@ pmd {
 }
 
 openApiGenerate {
-	generatorName = "spring"
+	generatorName = "kotlin-spring"
 	inputSpec = "$rootDir$apiSpecDir/openapi-fit-man.yaml"
 	outputDir = "$rootDir$apiGenDir"
 	apiPackage = "fit.man.app.api"
 	modelPackage = "fit.man.app.api.model"
+	templateDir = "$rootDir$apiSpecDir/templates"
 	validateSpec = true
-	importMappings = [
-			"Nullable": "org.jspecify.annotations.Nullable"
-	]
 	configOptions = [
-	        "useSpringBoot4": "true",
-			"useJackson3": "true",
-			"openApiNullable": "false",
 			"interfaceOnly": "true",
-			"useSpringNullSafety": "false",
-			"additionalModelTypeAnnotations": "@org.jspecify.annotations.NullMarked"
+			"useSpringBoot4": "true",
+			"useJakartaEe": "true",
+			"exceptionHandler": "false"
 	]
 }
 
 sourceSets {
 	main {
-		java {
-			srcDirs += "$rootDir$apiGenDir/src/main/java"
+		kotlin {
+			srcDirs += "$rootDir$apiGenDir/src/main/kotlin"
 		}
 	}
 }

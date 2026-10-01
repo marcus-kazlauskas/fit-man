@@ -11,71 +11,64 @@ import fit.man.app.util.ActivityUtils
 import java.time.format.DateTimeFormatter
 
 fun Activity.toResponse(): ActivityResponse {
-    val response = ActivityResponse()
-    response.id = id
-    endTime?.let { response.endTime = it }
-    startTime?.let { response.startTime = it }
-    sport?.let { response.sport = it }
-    totalElapsedTime?.let { response.totalElapsedTime = it.toString() }
-    totalTimerTime?.let { response.totalTimerTime = it.toString() }
-    response.totalDistance = totalDistance
-    totalCalories?.let { response.totalCalories = it.toFloat() }
-    totalAscent?.let { response.totalAscent = it.toFloat() }
-    response.enhancedAvgSpeed = enhancedAvgSpeed
-    response.enhancedMaxSpeed = enhancedMaxSpeed
-    userName?.let { response.userName = it }
-    deviceName?.let { response.deviceName = it }
-    response.marked = marked
-    response.records = records.map { it.toResponse() }
-    response.events = events.map { it.toResponse() }
-    return response
+    return ActivityResponse(
+        id = id,
+        endTime = endTime!!,
+        startTime = startTime!!,
+        sport = sport!!,
+        userName = userName!!,
+        deviceName = deviceName!!,
+        marked = marked,
+        totalElapsedTime = totalElapsedTime?.toString(),
+        totalTimerTime = totalTimerTime?.toString(),
+        totalDistance = totalDistance,
+        totalCalories = totalCalories?.toFloat(),
+        totalAscent = totalAscent?.toFloat(),
+        enhancedAvgSpeed = enhancedAvgSpeed,
+        enhancedMaxSpeed = enhancedMaxSpeed,
+        records = records.map { it.toResponse() },
+        events = events.map { it.toResponse() }
+    )
 }
 
 fun Record.toResponse(): RecordResponse {
-    val response = RecordResponse()
-    response.id = id
-    positionTime?.let { response.positionTime = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it) }
-    response.positionLat = positionLat
-    response.positionLong = positionLong
-    distance?.let { response.distance = it.toDouble() }
-    enhancedSpeed?.let { response.enhancedSpeed = it.toDouble() }
-    enhancedAltitude?.let { response.enhancedAltitude = it.toDouble() }
-    mark?.let { response.mark = it.toInt() }
-    return response
+    return RecordResponse(
+        id = id,
+        mark = mark!!.toInt(),
+        positionTime = positionTime?.let { DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it) },
+        positionLat = positionLat,
+        positionLong = positionLong,
+        distance = distance?.toDouble(),
+        enhancedSpeed = enhancedSpeed?.toDouble(),
+        enhancedAltitude = enhancedAltitude?.toDouble()
+    )
 }
 
 fun Event.toResponse(): EventResponse {
-    val response = EventResponse()
-    response.id = id
-    eventTime?.let { response.eventTime = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it) }
-    response.eventName = eventName
-    response.eventType = eventType
-    return response
+    return EventResponse(
+        id = id,
+        eventTime = eventTime?.let { DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(it) },
+        eventName = eventName,
+        eventType = eventType
+    )
 }
 
-fun Activity?.toTrackResponse(): TrackResponse {
-    val trackResponse = TrackResponse()
-    if (this == null) {
-        return trackResponse
-    }
-
-    trackResponse.startTime = ActivityUtils.toLocalDateTimeString(startTime!!)
-    trackResponse.totalElapsedTime = totalElapsedTime!!.seconds
-
+fun Activity.toTrackResponse(): TrackResponse {
     val currentAnalysis = analysis
-    if (currentAnalysis == null || !currentAnalysis.success) {
-        trackResponse.totalDistance = totalDistance
-        trackResponse.movingTime = totalTimerTime!!.seconds
-        trackResponse.averageSpeed = enhancedAvgSpeed
+    val (trackDistance, trackMovingTime, trackAvgSpeed) = if (currentAnalysis == null || !currentAnalysis.success) {
+        Triple(totalDistance, totalTimerTime!!.seconds, enhancedAvgSpeed)
     } else {
-        trackResponse.totalDistance = currentAnalysis.totalDistance
-        trackResponse.movingTime = currentAnalysis.movingTime
-        trackResponse.averageSpeed = currentAnalysis.averageSpeed
+        Triple(currentAnalysis.totalDistance, currentAnalysis.movingTime, currentAnalysis.averageSpeed)
     }
 
-    trackResponse.points = records
-        .filter { it.positionLat != null && it.positionLong != null && it.mark == ActivityUtils.MARK_DEFAULT }
-        .map { listOf(it.positionLat!!, it.positionLong!!) }
-
-    return trackResponse
+    return TrackResponse(
+        startTime = ActivityUtils.toLocalDateTimeString(startTime!!),
+        totalElapsedTime = totalElapsedTime!!.seconds,
+        totalDistance = trackDistance,
+        movingTime = trackMovingTime,
+        averageSpeed = trackAvgSpeed,
+        points = records
+            .filter { it.positionLat != null && it.positionLong != null && it.mark == ActivityUtils.MARK_DEFAULT }
+            .map { listOf(it.positionLat!!, it.positionLong!!) }
+    )
 }

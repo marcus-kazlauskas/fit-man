@@ -31,6 +31,8 @@ public final class ActivityFixtures {
         activity.setTotalAscent(666);
         activity.setEnhancedAvgSpeed(4F);
         activity.setEnhancedMaxSpeed(5F);
+        activity.setUserName("Misha");
+        activity.setDeviceName("App");
 
         var record = new Record();
         record.setPositionTime(POSITION_TIME_1);
