@@ -5,7 +5,6 @@ import fit.man.app.advice.exception.FitFileException;
 import fit.man.app.api.model.ActivityResponse;
 import fit.man.app.config.AppProperties;
 import fit.man.app.fixtures.ActivityFixtures;
-import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.entity.Activity;
 import fit.man.app.util.ActivityUtils;
@@ -31,10 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 
-@Import({
-        ActivityService.class,
-        ActivityMapperImpl.class
-})
+@Import(ActivityService.class)
 @EnableConfigurationProperties(AppProperties.class)
 @SpringJUnitConfig
 public class ActivityServiceTests {

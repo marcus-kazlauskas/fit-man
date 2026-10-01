@@ -3,7 +3,6 @@ package fit.man.app.service;
 import fit.man.app.config.AppProperties;
 import fit.man.app.config.AppThreadPoolConfig;
 import fit.man.app.fixtures.ActivityFixtures;
-import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import fit.man.app.repository.AnalysisRepository;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 @Import({
         AnalysisService.class,
         ActivityService.class,
-        ActivityMapperImpl.class,
         AppThreadPoolConfig.class
 })
 @EnableConfigurationProperties(AppProperties.class)

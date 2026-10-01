@@ -2,7 +2,6 @@ package fit.man.app.service;
 
 import fit.man.app.config.AppProperties;
 import fit.man.app.fixtures.ActivityFixtures;
-import fit.man.app.mapper.ActivityMapperImpl;
 import fit.man.app.repository.ActivityRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,8 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @Import({
         MarkupService.class,
-        ActivityService.class,
-        ActivityMapperImpl.class
+        ActivityService.class
 })
 @EnableConfigurationProperties(AppProperties.class)
 @SpringJUnitConfig
