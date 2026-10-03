@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class AppScheduler(
     private val markupService: MarkupService,
-    private val analysisService: AnalysisService
+    private val analysisService: AnalysisService,
 ) {
     @Scheduled(fixedRateString = "\${fit-man.activity-scheduler.fixed-rate:PT1M}")
     fun runActivityMarkup() {
@@ -17,7 +17,7 @@ class AppScheduler(
 
     @Scheduled(
         fixedRateString = "\${fit-man.activity-scheduler.fixed-rate:PT1M}",
-        initialDelayString = "\${fit-man.activity-scheduler.initial-delay:PT30S}"
+        initialDelayString = "\${fit-man.activity-scheduler.initial-delay:PT30S}",
     )
     fun runActivityAnalysis() {
         analysisService.runAnalysis()

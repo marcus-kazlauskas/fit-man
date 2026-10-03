@@ -21,11 +21,12 @@ cd ..
 
 ```shell
 ./gradlew bootRun                 # run the app on localhost:8080
-./gradlew build                   # full build: compile, test, jacoco coverage verification, pmd
+./gradlew build                   # full build: compile, test, jacoco coverage verification, ktlint
 ./gradlew test                    # run tests only
 ./gradlew test --tests "fit.man.app.service.AnalysisServiceTests"          # single test class
 ./gradlew test --tests "fit.man.app.service.AnalysisServiceTests.methodName" # single test method
-./gradlew pmdMain                 # static analysis (also runs automatically before bootRun)
+./gradlew ktlintCheck             # static analysis (main source set also runs automatically before bootRun)
+./gradlew ktlintFormat            # auto-fix formatting issues
 ./gradlew jacocoTestReport        # coverage report (build/reports/jacoco)
 ```
 

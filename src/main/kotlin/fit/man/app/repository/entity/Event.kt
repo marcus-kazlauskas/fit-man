@@ -35,7 +35,5 @@ class Event {
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)
     var activity: Activity? = null
 
-    override fun toString(): String {
-        return "Event(id=$id, eventTime=$eventTime, eventName=$eventName, eventType=$eventType)"
-    }
+    override fun toString(): String = "Event(id=$id, eventTime=$eventTime, eventName=$eventName, eventType=$eventType)"
 }

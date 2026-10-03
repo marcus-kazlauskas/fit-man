@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class MarkupService(
     private val activityService: ActivityService,
     private val activityRepository: ActivityRepository,
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
 ) {
     fun runMarkup() {
         val activities = activityService.findActivitiesForMarkup()
@@ -48,9 +48,10 @@ class MarkupService(
         log.atInfo().log("Saved marked up activity {}", activity)
     }
 
-    fun speedIsTooHigh(rec1: Record, rec2: Record): Boolean {
-        return ActivityUtils.calcSpeed(rec1, rec2) > appProperties.activityScheduler.maxSpeed
-    }
+    fun speedIsTooHigh(
+        rec1: Record,
+        rec2: Record,
+    ): Boolean = ActivityUtils.calcSpeed(rec1, rec2) > appProperties.activityScheduler.maxSpeed
 
     companion object {
         private val log = LoggerFactory.getLogger(MarkupService::class.java)

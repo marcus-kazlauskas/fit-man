@@ -25,10 +25,11 @@ class TrackControllerTests {
         whenever(activityService.getTrackInRange(anyString(), anyString()))
             .thenReturn(TrackResponse("2026-04-01T13:12:00.000", null, null, null, null, null))
 
-        mockMvc.perform(
-            get("/track/points")
-                .param("startTimeBegin", "2025-07-05T02:00:00")
-                .param("startTimeEnd", "2025-07-06T02:00:00")
-        ).andExpect(status().isOk())
+        mockMvc
+            .perform(
+                get("/track/points")
+                    .param("startTimeBegin", "2025-07-05T02:00:00")
+                    .param("startTimeEnd", "2025-07-06T02:00:00"),
+            ).andExpect(status().isOk())
     }
 }

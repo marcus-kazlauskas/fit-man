@@ -20,26 +20,34 @@ object ActivityUtils {
     val DECIMAL_DEGREES = 180.0 / Math.pow(2.0, 31.0)
 
     @JvmStatic
-    fun toOffsetDateTime(dateTime: String): OffsetDateTime {
-        return LocalDateTime.parse(dateTime)
-            .atZone(ZoneId.systemDefault()).toOffsetDateTime()
-    }
+    fun toOffsetDateTime(dateTime: String): OffsetDateTime =
+        LocalDateTime
+            .parse(dateTime)
+            .atZone(ZoneId.systemDefault())
+            .toOffsetDateTime()
 
     @JvmStatic
     fun toLocalDateTimeString(odt: OffsetDateTime): String {
-        val adjustedOdt = odt.withOffsetSameInstant(
-            ZoneId.systemDefault().rules.getOffset(odt.toInstant())
-        )
+        val adjustedOdt =
+            odt.withOffsetSameInstant(
+                ZoneId.systemDefault().rules.getOffset(odt.toInstant()),
+            )
         return adjustedOdt.toLocalDateTime().toString()
     }
 
     @JvmStatic
-    fun calcDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        return Geodesic.WGS84.Inverse(lat1, lon1, lat2, lon2).s12
-    }
+    fun calcDistance(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double,
+    ): Double = Geodesic.WGS84.Inverse(lat1, lon1, lat2, lon2).s12
 
     @JvmStatic
-    fun calcSpeed(rec1: Record, rec2: Record): Double {
+    fun calcSpeed(
+        rec1: Record,
+        rec2: Record,
+    ): Double {
         val dist = calcDistance(rec1.positionLat!!, rec1.positionLong!!, rec2.positionLat!!, rec2.positionLong!!)
         val time = Duration.between(rec1.positionTime, rec2.positionTime).toMillis() / MILLIS.toDouble()
         if (time == 0.0) {
@@ -49,7 +57,5 @@ object ActivityUtils {
     }
 
     @JvmStatic
-    fun positionIsNull(rec: Record): Boolean {
-        return rec.positionLat == null || rec.positionLong == null || rec.positionTime == null
-    }
+    fun positionIsNull(rec: Record): Boolean = rec.positionLat == null || rec.positionLong == null || rec.positionTime == null
 }

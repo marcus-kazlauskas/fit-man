@@ -47,9 +47,8 @@ class Record {
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)
     var activity: Activity? = null
 
-    override fun toString(): String {
-        return "Record(id=$id, positionTime=$positionTime, positionLat=$positionLat, " +
-                "positionLong=$positionLong, distance=$distance, enhancedSpeed=$enhancedSpeed, " +
-                "enhancedAltitude=$enhancedAltitude, mark=$mark)"
-    }
+    override fun toString(): String =
+        "Record(id=$id, positionTime=$positionTime, positionLat=$positionLat, " +
+            "positionLong=$positionLong, distance=$distance, enhancedSpeed=$enhancedSpeed, " +
+            "enhancedAltitude=$enhancedAltitude, mark=$mark)"
 }

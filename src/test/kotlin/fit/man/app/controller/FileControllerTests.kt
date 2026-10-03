@@ -25,10 +25,11 @@ class FileControllerTests {
 
     @Test
     fun shouldReturnActivity() {
-        mockMvc.perform(
-            post("/file/upload")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .content(fitFile.contentAsByteArray)
-        ).andExpect(status().isOk())
+        mockMvc
+            .perform(
+                post("/file/upload")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .content(fitFile.contentAsByteArray),
+            ).andExpect(status().isOk())
     }
 }

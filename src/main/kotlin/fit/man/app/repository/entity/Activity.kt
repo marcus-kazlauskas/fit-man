@@ -101,10 +101,9 @@ class Activity {
         if (deviceName == null) deviceName = "App"
     }
 
-    override fun toString(): String {
-        return "Activity(id=$id, endTime=$endTime, startTime=$startTime, sport=$sport, " +
-                "totalElapsedTime=$totalElapsedTime, totalTimerTime=$totalTimerTime, totalDistance=$totalDistance, " +
-                "totalCalories=$totalCalories, totalAscent=$totalAscent, enhancedAvgSpeed=$enhancedAvgSpeed, " +
-                "enhancedMaxSpeed=$enhancedMaxSpeed, userName=$userName, deviceName=$deviceName, marked=$marked)"
-    }
+    override fun toString(): String =
+        "Activity(id=$id, endTime=$endTime, startTime=$startTime, sport=$sport, " +
+            "totalElapsedTime=$totalElapsedTime, totalTimerTime=$totalTimerTime, totalDistance=$totalDistance, " +
+            "totalCalories=$totalCalories, totalAscent=$totalAscent, enhancedAvgSpeed=$enhancedAvgSpeed, " +
+            "enhancedMaxSpeed=$enhancedMaxSpeed, userName=$userName, deviceName=$deviceName, marked=$marked)"
 }

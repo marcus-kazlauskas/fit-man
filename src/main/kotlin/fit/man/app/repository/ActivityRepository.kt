@@ -14,7 +14,7 @@ interface ActivityRepository : JpaRepository<Activity, Long> {
 
     fun findFirstByStartTimeBetweenOrderByStartTime(
         startTimeBegin: OffsetDateTime,
-        startTimeEnd: OffsetDateTime
+        startTimeEnd: OffsetDateTime,
     ): Optional<Activity>
 
     @Query(
@@ -22,7 +22,7 @@ interface ActivityRepository : JpaRepository<Activity, Long> {
         SELECT a FROM Activity a
         LEFT JOIN FETCH a.analysis an
         WHERE a.marked = false
-        """
+        """,
     )
     fun findByMarkedFalse(pageable: Pageable): List<Activity>
 
@@ -32,7 +32,7 @@ interface ActivityRepository : JpaRepository<Activity, Long> {
         LEFT JOIN FETCH a.analysis an
         WHERE a.marked = true
         AND an IS NULL
-        """
+        """,
     )
     fun findByMarkedTrueAndAnalysisIsNull(pageable: Pageable): List<Activity>
 }

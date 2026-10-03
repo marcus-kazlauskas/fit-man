@@ -49,8 +49,9 @@ class MarkupServiceTests {
 
         whenever(
             activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-                any<OffsetDateTime>(), any<OffsetDateTime>()
-            )
+                any<OffsetDateTime>(),
+                any<OffsetDateTime>(),
+            ),
         ).thenReturn(Optional.of(activity))
 
         val track = activityService.getTrackInRange("2026-04-26T13:12:00", "2026-04-26T13:12:00")

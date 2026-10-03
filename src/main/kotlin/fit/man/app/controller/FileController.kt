@@ -12,16 +12,15 @@ import java.io.IOException
 
 @Controller
 class FileController(
-    private val activityService: ActivityService
+    private val activityService: ActivityService,
 ) : FileApi {
-    override fun postFileUpload(body: Resource): ResponseEntity<ActivityResponse> {
-        return try {
+    override fun postFileUpload(body: Resource): ResponseEntity<ActivityResponse> =
+        try {
             body.inputStream.use { ResponseEntity.ok(activityService.loadNewActivity(it)) }
         } catch (e: IOException) {
             log.atError().log(e.message, e)
             throw FitFileException(e.message.orEmpty(), e)
         }
-    }
 
     companion object {
         private val log = LoggerFactory.getLogger(FileController::class.java)

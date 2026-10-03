@@ -15,7 +15,8 @@ class UiControllerTests {
 
     @Test
     fun shouldReturnIndex() {
-        mockMvc.perform(get("/map"))
+        mockMvc
+            .perform(get("/map"))
             .andExpect(status().isOk())
             .andExpect(view().name("index"))
     }

@@ -42,10 +42,11 @@ class ActivityRepositoryTests {
     @Test
     fun shouldFindActivityInRange() {
         activityRepository.save(activity)
-        val foundActivity = activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-            ActivityFixtures.START_TIME.minusMinutes(1),
-            ActivityFixtures.START_TIME.plusMinutes(1)
-        )
+        val foundActivity =
+            activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
+                ActivityFixtures.START_TIME.minusMinutes(1),
+                ActivityFixtures.START_TIME.plusMinutes(1),
+            )
 
         assertThat(foundActivity).isPresent()
         assertThat(foundActivity.get().id).isNotNegative()

@@ -40,11 +40,12 @@ class GlobalExceptionHandlerTests {
         whenever(activityService.loadNewActivity(any<InputStream>()))
             .thenThrow(FitFileException(""))
 
-        mockMvc.perform(
-            post("/file/upload")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .content(pngFile.contentAsByteArray)
-        ).andExpect(status().isBadRequest())
+        mockMvc
+            .perform(
+                post("/file/upload")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .content(pngFile.contentAsByteArray),
+            ).andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
     }
@@ -54,11 +55,12 @@ class GlobalExceptionHandlerTests {
         whenever(activityService.getTrackInRange(anyString(), anyString()))
             .thenThrow(ActivityNotFoundException(""))
 
-        mockMvc.perform(
-            get("/track/points")
-                .param("startTimeBegin", "2025-07-05T02:00:00")
-                .param("startTimeEnd", "2025-07-06T02:00:00")
-        ).andExpect(status().isNotFound())
+        mockMvc
+            .perform(
+                get("/track/points")
+                    .param("startTimeBegin", "2025-07-05T02:00:00")
+                    .param("startTimeEnd", "2025-07-06T02:00:00"),
+            ).andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
     }

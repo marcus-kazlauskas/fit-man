@@ -22,7 +22,7 @@ class AnalysisService(
     private val activityService: ActivityService,
     private val analysisRepository: AnalysisRepository,
     private val appProperties: AppProperties,
-    @Qualifier("analysisExecutor") private val analysisExecutor: Executor
+    @Qualifier("analysisExecutor") private val analysisExecutor: Executor,
 ) {
     fun runAnalysis() {
         val activities = activityService.findActivitiesForAnalysis()
@@ -38,16 +38,21 @@ class AnalysisService(
         val records = activity.records
         val events = activity.events
 
-        val futureTotalDistance: CompletableFuture<Double> = CompletableFuture.supplyAsync(
-            { calcTotalDistance(records) }, analysisExecutor
-        )
+        val futureTotalDistance: CompletableFuture<Double> =
+            CompletableFuture.supplyAsync(
+                { calcTotalDistance(records) },
+                analysisExecutor,
+            )
 
-        val futureMovingTime: CompletableFuture<Double> = CompletableFuture.supplyAsync(
-            { calcMovingTime(records, events) }, analysisExecutor
-        )
+        val futureMovingTime: CompletableFuture<Double> =
+            CompletableFuture.supplyAsync(
+                { calcMovingTime(records, events) },
+                analysisExecutor,
+            )
 
         try {
-            CompletableFuture.allOf(futureTotalDistance, futureMovingTime)
+            CompletableFuture
+                .allOf(futureTotalDistance, futureMovingTime)
                 .orTimeout(appProperties.activityScheduler.timeout.toLong(), TimeUnit.SECONDS)
                 .join()
 
@@ -56,9 +61,12 @@ class AnalysisService(
 
             analysis.totalDistance = totalDistance.toFloat()
             analysis.movingTime = movingTime.toLong()
-            analysis.averageSpeed = if (movingTime > 0)
-                (totalDistance / movingTime * ActivityUtils.KM_PER_HOUR).toFloat()
-            else 0f
+            analysis.averageSpeed =
+                if (movingTime > 0) {
+                    (totalDistance / movingTime * ActivityUtils.KM_PER_HOUR).toFloat()
+                } else {
+                    0f
+                }
             analysis.success = true
         } catch (e: RuntimeException) {
             analysis.success = false
@@ -87,12 +95,13 @@ class AnalysisService(
                 if (record1.mark == ActivityUtils.MARK_DISABLED) {
                     i++
                 } else if (record2.mark == ActivityUtils.MARK_DEFAULT) {
-                    totalDistance += ActivityUtils.calcDistance(
-                        record1.positionLat!!,
-                        record1.positionLong!!,
-                        record2.positionLat!!,
-                        record2.positionLong!!
-                    )
+                    totalDistance +=
+                        ActivityUtils.calcDistance(
+                            record1.positionLat!!,
+                            record1.positionLong!!,
+                            record2.positionLat!!,
+                            record2.positionLong!!,
+                        )
                     i = j
                 }
                 j++
@@ -101,7 +110,10 @@ class AnalysisService(
         }
 
         @JvmStatic
-        fun calcMovingTime(records: List<Record>, events: List<Event>): Double {
+        fun calcMovingTime(
+            records: List<Record>,
+            events: List<Event>,
+        ): Double {
             if (records.isEmpty() || events.isEmpty()) {
                 return 0.0
             }
@@ -119,10 +131,11 @@ class AnalysisService(
                 if (record1.mark == ActivityUtils.MARK_DISABLED) {
                     i++
                 } else if (record2.mark == ActivityUtils.MARK_DEFAULT) {
-                    trackTime += Duration.between(
-                        record1.positionTime,
-                        record2.positionTime
-                    ).toMillis() / ActivityUtils.MILLIS.toDouble()
+                    trackTime += Duration
+                        .between(
+                            record1.positionTime,
+                            record2.positionTime,
+                        ).toMillis() / ActivityUtils.MILLIS.toDouble()
                     i = j
 
                     if (k < events.size) {
@@ -158,10 +171,11 @@ class AnalysisService(
                 } else if (event2.eventType == EventType.STOP.name || event2.eventType == EventType.STOP_ALL.name) {
                     l++
                 } else {
-                    idlingTime += Duration.between(
-                        event1.eventTime,
-                        event2.eventTime
-                    ).toMillis() / ActivityUtils.MILLIS.toDouble()
+                    idlingTime += Duration
+                        .between(
+                            event1.eventTime,
+                            event2.eventTime,
+                        ).toMillis() / ActivityUtils.MILLIS.toDouble()
                     k = l + 1
                     l = k + 1
                 }
@@ -169,7 +183,9 @@ class AnalysisService(
             val movingTime = trackTime - idlingTime
             log.atInfo().log(
                 "Result: trackTime[{}] - idlingTime[{}] = movingTime[{}]",
-                trackTime, idlingTime, movingTime
+                trackTime,
+                idlingTime,
+                movingTime,
             )
 
             return movingTime

@@ -8,9 +8,10 @@ import org.springframework.stereotype.Controller
 
 @Controller
 class TrackController(
-    private val activityService: ActivityService
+    private val activityService: ActivityService,
 ) : TrackApi {
-    override fun getTrackPoints(startTimeBegin: String, startTimeEnd: String): ResponseEntity<TrackResponse> {
-        return ResponseEntity.ok(activityService.getTrackInRange(startTimeBegin, startTimeEnd))
-    }
+    override fun getTrackPoints(
+        startTimeBegin: String,
+        startTimeEnd: String,
+    ): ResponseEntity<TrackResponse> = ResponseEntity.ok(activityService.getTrackInRange(startTimeBegin, startTimeEnd))
 }

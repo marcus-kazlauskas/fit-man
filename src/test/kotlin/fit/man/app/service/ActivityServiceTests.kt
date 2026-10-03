@@ -61,13 +61,13 @@ class ActivityServiceTests {
             { assertEquals(23.842F, activity.enhancedMaxSpeed) },
             { assertEquals("Mikhail Kozlov", activity.userName) },
             { assertEquals("Cannondale App", activity.deviceName) },
-            { assertFalse(activity.marked) }
+            { assertFalse(activity.marked) },
         )
         assertThat(activity.records).isNotEmpty()
         val record = activity.records.first()
         assertAll(
             { assertEquals(LocalDateTime.parse("2025-07-04T23:59:50.000"), record.positionTime) },
-            { assertEquals(ActivityUtils.MARK_DEFAULT, record.mark) }
+            { assertEquals(ActivityUtils.MARK_DEFAULT, record.mark) },
         )
     }
 
@@ -107,8 +107,9 @@ class ActivityServiceTests {
 
         whenever(
             activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-                any<OffsetDateTime>(), any<OffsetDateTime>()
-            )
+                any<OffsetDateTime>(),
+                any<OffsetDateTime>(),
+            ),
         ).thenReturn(Optional.of(activity))
 
         val track = activityService.getTrackInRange("2026-04-26T13:12:00", "2026-04-26T13:12:00")
@@ -120,7 +121,7 @@ class ActivityServiceTests {
             { assertEquals(86400L, track.totalElapsedTime) },
             { assertEquals(13.12F, track.totalDistance) },
             { assertEquals(47520L, track.movingTime) },
-            { assertEquals(4F, track.averageSpeed) }
+            { assertEquals(4F, track.averageSpeed) },
         )
     }
 
@@ -132,8 +133,9 @@ class ActivityServiceTests {
 
         whenever(
             activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-                any<OffsetDateTime>(), any<OffsetDateTime>()
-            )
+                any<OffsetDateTime>(),
+                any<OffsetDateTime>(),
+            ),
         ).thenReturn(Optional.of(activity))
 
         val track = activityService.getTrackInRange("2026-04-26T13:12:00", "2026-04-26T13:12:00")
@@ -145,7 +147,7 @@ class ActivityServiceTests {
             { assertEquals(86400L, track.totalElapsedTime) },
             { assertEquals(13000F, track.totalDistance) },
             { assertEquals(43200L, track.movingTime) },
-            { assertEquals(1.08F, track.averageSpeed) }
+            { assertEquals(1.08F, track.averageSpeed) },
         )
     }
 
@@ -157,8 +159,9 @@ class ActivityServiceTests {
 
         whenever(
             activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-                any<OffsetDateTime>(), any<OffsetDateTime>()
-            )
+                any<OffsetDateTime>(),
+                any<OffsetDateTime>(),
+            ),
         ).thenReturn(Optional.of(activity))
 
         val track = activityService.getTrackInRange("2026-04-26T13:12:00", "2026-04-26T13:12:00")
@@ -170,7 +173,7 @@ class ActivityServiceTests {
             { assertEquals(86400L, track.totalElapsedTime) },
             { assertEquals(13.12F, track.totalDistance) },
             { assertEquals(47520L, track.movingTime) },
-            { assertEquals(4F, track.averageSpeed) }
+            { assertEquals(4F, track.averageSpeed) },
         )
     }
 
@@ -178,8 +181,9 @@ class ActivityServiceTests {
     fun shouldThrowExceptionWhenActivityNotFound() {
         whenever(
             activityRepository.findFirstByStartTimeBetweenOrderByStartTime(
-                any<OffsetDateTime>(), any<OffsetDateTime>()
-            )
+                any<OffsetDateTime>(),
+                any<OffsetDateTime>(),
+            ),
         ).thenReturn(Optional.empty())
 
         assertThatThrownBy {

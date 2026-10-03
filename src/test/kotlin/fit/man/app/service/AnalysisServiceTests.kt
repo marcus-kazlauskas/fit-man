@@ -37,7 +37,7 @@ class AnalysisServiceTests {
         val activity = ActivityFixtures.createNewActivity()
 
         whenever(
-            activityRepository.findByMarkedTrueAndAnalysisIsNull(any<PageRequest>())
+            activityRepository.findByMarkedTrueAndAnalysisIsNull(any<PageRequest>()),
         ).thenReturn(listOf(activity))
 
         analysisService.runAnalysis()

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference
 @Transactional
 class ActivityService(
     private val activityRepository: ActivityRepository,
-    private val appProperties: AppProperties
+    private val appProperties: AppProperties,
 ) {
     fun readFitFile(inputStream: InputStream): Activity {
         val activity = Activity()
@@ -92,9 +92,11 @@ class ActivityService(
 
         broadcaster.addListener { mesg: RecordMesg ->
             val record = Record()
-            val positionTimeUtc = mesg.timestamp.date.toInstant()
-                .atOffset(ZoneOffset.UTC)
-                .toLocalDateTime()
+            val positionTimeUtc =
+                mesg.timestamp.date
+                    .toInstant()
+                    .atOffset(ZoneOffset.UTC)
+                    .toLocalDateTime()
             record.positionTime = positionTimeUtc
             val positionLat = mesg.positionLat
             if (positionLat != null) {
@@ -113,9 +115,11 @@ class ActivityService(
 
         broadcaster.addListener { mesg: EventMesg ->
             val event = Event()
-            val eventTimeUtc = mesg.timestamp.date.toInstant()
-                .atOffset(ZoneOffset.UTC)
-                .toLocalDateTime()
+            val eventTimeUtc =
+                mesg.timestamp.date
+                    .toInstant()
+                    .atOffset(ZoneOffset.UTC)
+                    .toLocalDateTime()
             event.eventTime = eventTimeUtc
             event.eventName = mesg.event.name
             event.eventType = mesg.eventType.name
@@ -150,13 +154,19 @@ class ActivityService(
         return savedActivity
     }
 
-    fun getTrackInRange(startTimeBegin: String, startTimeEnd: String): TrackResponse {
+    fun getTrackInRange(
+        startTimeBegin: String,
+        startTimeEnd: String,
+    ): TrackResponse {
         val start = ActivityUtils.toOffsetDateTime(startTimeBegin)
         val end = ActivityUtils.toOffsetDateTime(startTimeEnd)
         return getTrackInRange(start, end)
     }
 
-    private fun getTrackInRange(startTimeBegin: OffsetDateTime, startTimeEnd: OffsetDateTime): TrackResponse {
+    private fun getTrackInRange(
+        startTimeBegin: OffsetDateTime,
+        startTimeEnd: OffsetDateTime,
+    ): TrackResponse {
         val track = activityRepository.findFirstByStartTimeBetweenOrderByStartTime(startTimeBegin, startTimeEnd)
         if (track.isPresent) {
             log.atInfo().log("Read track {}", track)

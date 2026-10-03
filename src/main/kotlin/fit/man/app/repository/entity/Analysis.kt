@@ -35,8 +35,7 @@ class Analysis {
     @JoinColumn(name = ActivityUtils.ACTIVITY_TABLE_ID)
     var activity: Activity? = null
 
-    override fun toString(): String {
-        return "Analysis(id=$id, totalDistance=$totalDistance, movingTime=$movingTime, " +
-                "averageSpeed=$averageSpeed, success=$success)"
-    }
+    override fun toString(): String =
+        "Analysis(id=$id, totalDistance=$totalDistance, movingTime=$movingTime, " +
+            "averageSpeed=$averageSpeed, success=$success)"
 }
