@@ -86,5 +86,5 @@ mark values) — reuse these constants rather than redefining them. Lombok is co
 
 Tests mirror `src/main/java` package structure under `src/test/java`. `fixtures/ActivityFixtures.java` is the shared
 builder for `Activity`/`Record`/`Event` test data — extend it rather than hand-rolling entity graphs in new tests.
-Jacoco enforces 80% line coverage (`build.gradle` `jacocoTestCoverageVerification`) as part of `./gradlew build`;
+Jacoco enforces 80% line coverage (`build.gradle.kts` `jacocoTestCoverageVerification`) as part of `./gradlew build`;
 generated API code, mappers, and `*Util` classes are excluded from that check.

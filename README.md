@@ -2,7 +2,7 @@
 
 ### [.fit](https://developer.garmin.com/fit/protocol/) files management tool
 
-Version 1.0.0
+Version 2.0.0
 
 This app is intended to fix GPS signal losses in activities recorded by mobile devices in .fit format. You can upload 
 such an activity (for example, [this file](src/test/resources/files/3669406B-081F-4E9D-B36E-C15FFB139DA9.fit)) 
@@ -23,7 +23,7 @@ Note: The algorithm requires the very first point of the track to be valid!
 
 Requirements: 
 
-- ***Java 21*** or higher
+- ***Java 25*** or higher
 - ***Podman Desktop*** (or Docker Desktop)
 
 Local environment:
