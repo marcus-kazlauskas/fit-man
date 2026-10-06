@@ -13,10 +13,10 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
-    id("org.springframework.boot") version "4.0.6"
+    id("org.springframework.boot") version "4.0.8"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.openapi.generator") version "7.22.0"
+    id("org.openapi.generator") version "7.25.0"
     jacoco
 }
 

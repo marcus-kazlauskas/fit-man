@@ -27,11 +27,11 @@ class AnalysisService(
     fun runAnalysis() {
         val activities = activityService.findActivitiesForAnalysis()
         for (activity in activities) {
-            analyzeAnSave(activity)
+            analyzeAndSave(activity)
         }
     }
 
-    private fun analyzeAnSave(activity: Activity) {
+    private fun analyzeAndSave(activity: Activity) {
         val analysis = Analysis()
         analysis.activity = activity
 
@@ -80,7 +80,6 @@ class AnalysisService(
     companion object {
         private val log = LoggerFactory.getLogger(AnalysisService::class.java)
 
-        @JvmStatic
         fun calcTotalDistance(records: List<Record>): Double {
             if (records.isEmpty()) {
                 return 0.0
@@ -109,7 +108,6 @@ class AnalysisService(
             return totalDistance
         }
 
-        @JvmStatic
         fun calcMovingTime(
             records: List<Record>,
             events: List<Event>,

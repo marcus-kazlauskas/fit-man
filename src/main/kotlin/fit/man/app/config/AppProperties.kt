@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "fit-man", ignoreInvalidFields = true)
 data class AppProperties(
-    @get:JvmName("activityScheduler")
     val activityScheduler: ActivityScheduler =
         ActivityScheduler(
             fixedRate = "PT1M",
@@ -16,11 +15,11 @@ data class AppProperties(
         ),
 ) {
     data class ActivityScheduler(
-        @get:JvmName("fixedRate") val fixedRate: String,
-        @get:JvmName("initialDelay") val initialDelay: String,
-        @get:JvmName("batchSize") val batchSize: Int,
-        @get:JvmName("maxSpeed") val maxSpeed: Float,
-        @get:JvmName("threadPoolSize") val threadPoolSize: Int,
-        @get:JvmName("timeout") val timeout: Int,
+        val fixedRate: String,
+        val initialDelay: String,
+        val batchSize: Int,
+        val maxSpeed: Float,
+        val threadPoolSize: Int,
+        val timeout: Int,
     )
 }

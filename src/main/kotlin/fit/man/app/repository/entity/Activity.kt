@@ -67,7 +67,7 @@ class Activity {
     @Column(name = "marked", nullable = false)
     var marked: Boolean = false
 
-    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_FIELD, cascade = [CascadeType.ALL], orphanRemoval = true)
     @OrderBy("positionTime")
     var records: MutableList<Record> = mutableListOf()
 
@@ -76,7 +76,7 @@ class Activity {
         record.activity = this
     }
 
-    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = ActivityUtils.ACTIVITY_FIELD, cascade = [CascadeType.ALL], orphanRemoval = true)
     @OrderBy("eventTime")
     var events: MutableList<Event> = mutableListOf()
 
@@ -85,7 +85,7 @@ class Activity {
         event.activity = this
     }
 
-    @OneToOne(mappedBy = ActivityUtils.ACTIVITY_TABLE, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToOne(mappedBy = ActivityUtils.ACTIVITY_FIELD, cascade = [CascadeType.ALL], orphanRemoval = true)
     var analysis: Analysis? = null
         set(value) {
             field = value
