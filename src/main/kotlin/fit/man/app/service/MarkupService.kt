@@ -5,9 +5,11 @@ import fit.man.app.repository.ActivityRepository
 import fit.man.app.repository.entity.Activity
 import fit.man.app.repository.entity.Record
 import fit.man.app.util.ActivityUtils
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger {}
 
 @Service
 @Transactional
@@ -45,15 +47,11 @@ class MarkupService(
         }
         activity.marked = true
         activityRepository.save(activity)
-        log.atInfo().log("Saved marked up activity {}", activity)
+        log.info { "Saved marked up activity $activity" }
     }
 
     fun speedIsTooHigh(
         rec1: Record,
         rec2: Record,
     ): Boolean = ActivityUtils.calcSpeed(rec1, rec2) > appProperties.activityScheduler.maxSpeed
-
-    companion object {
-        private val log = LoggerFactory.getLogger(MarkupService::class.java)
-    }
 }

@@ -21,8 +21,8 @@ import fit.man.app.repository.entity.Activity
 import fit.man.app.repository.entity.Event
 import fit.man.app.repository.entity.Record
 import fit.man.app.util.ActivityUtils
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.hibernate.Hibernate
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -34,6 +34,8 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.atomic.AtomicReference
+
+private val log = KotlinLogging.logger {}
 
 @Service
 @Transactional
@@ -129,7 +131,7 @@ class ActivityService(
         try {
             broadcaster.run(inputStream)
         } catch (e: RuntimeException) {
-            log.atWarn().log(e.message)
+            log.warn { e.message }
             throw FitFileException(e.message.orEmpty(), e)
         }
 
@@ -146,11 +148,11 @@ class ActivityService(
 
     fun checkNotExistsAndSave(activity: Activity): Activity {
         if (activityRepository.existsByStartTime(activity.startTime!!)) {
-            log.atWarn().log("This activity {} is already saved in DB", activity)
+            log.warn { "This activity $activity is already saved in DB" }
             throw FitFileException("Activity with startTime specified is already saved in DB")
         }
         val savedActivity = activityRepository.save(activity)
-        log.atInfo().log("Saved activity {}", savedActivity)
+        log.info { "Saved activity $savedActivity" }
         return savedActivity
     }
 
@@ -169,10 +171,10 @@ class ActivityService(
     ): TrackResponse {
         val track = activityRepository.findFirstByStartTimeBetweenOrderByStartTime(startTimeBegin, startTimeEnd)
         if (track.isPresent) {
-            log.atInfo().log("Read track {}", track)
+            log.info { "Read track $track" }
             return track.get().toTrackResponse()
         }
-        log.atWarn().log("No activity with startTime from {} to {}", startTimeBegin, startTimeEnd)
+        log.warn { "No activity with startTime from $startTimeBegin to $startTimeEnd" }
         throw ActivityNotFoundException("No activity with startTime specified")
     }
 
@@ -181,7 +183,7 @@ class ActivityService(
         for (activity in activities) {
             Hibernate.initialize(activity.records)
         }
-        log.atInfo().log("{} activities selected for markup", activities.size)
+        log.info { "${activities.size} activities selected for markup" }
         return activities
     }
 
@@ -191,14 +193,10 @@ class ActivityService(
             Hibernate.initialize(activity.records)
             Hibernate.initialize(activity.events)
         }
-        log.atInfo().log("{} activities selected for analysis", activities.size)
+        log.info { "${activities.size} activities selected for analysis" }
         return activities
     }
 
     private val activityRequest: Pageable
         get() = PageRequest.of(0, appProperties.activityScheduler.batchSize, Sort.by("startTime"))
-
-    companion object {
-        private val log = LoggerFactory.getLogger(ActivityService::class.java)
-    }
 }

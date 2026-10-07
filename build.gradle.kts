@@ -4,6 +4,7 @@ val springdocStarterUi: String by project
 val fitVersion: String by project
 val geographicLibVersion: String by project
 val mockitoKotlinVersion: String by project
+val kotlinLoggingVersion: String by project
 
 val apiSpecDir: String by project
 val apiGenDir: String by project
@@ -45,6 +46,8 @@ dependencies {
     implementation("com.garmin:fit:$fitVersion")
 
     implementation("net.sf.geographiclib:GeographicLib-Java:$geographicLibVersion")
+
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
     runtimeOnly("org.postgresql:postgresql")
 

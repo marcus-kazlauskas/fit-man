@@ -8,7 +8,7 @@ import fit.man.app.repository.entity.Analysis
 import fit.man.app.repository.entity.Event
 import fit.man.app.repository.entity.Record
 import fit.man.app.util.ActivityUtils
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -16,6 +16,8 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class AnalysisService(
@@ -70,16 +72,14 @@ class AnalysisService(
             analysis.success = true
         } catch (e: RuntimeException) {
             analysis.success = false
-            log.atWarn().log("Exception occurred during analysis: ", e)
+            log.warn(e) { "Exception occurred during analysis: " }
         }
 
         analysisRepository.save(analysis)
-        log.atInfo().log("Saved analysis {}", analysis)
+        log.info { "Saved analysis $analysis" }
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(AnalysisService::class.java)
-
         fun calcTotalDistance(records: List<Record>): Double {
             if (records.isEmpty()) {
                 return 0.0
@@ -155,7 +155,7 @@ class AnalysisService(
                 }
                 j++
             }
-            log.atInfo().log("Collected valid {} timer events {}", validEvents.size, validEvents)
+            log.info { "Collected valid ${validEvents.size} timer events $validEvents" }
 
             var idlingTime = 0.0
             k = 0
@@ -179,12 +179,7 @@ class AnalysisService(
                 }
             }
             val movingTime = trackTime - idlingTime
-            log.atInfo().log(
-                "Result: trackTime[{}] - idlingTime[{}] = movingTime[{}]",
-                trackTime,
-                idlingTime,
-                movingTime,
-            )
+            log.info { "Result: trackTime[$trackTime] - idlingTime[$idlingTime] = movingTime[$movingTime]" }
 
             return movingTime
         }
