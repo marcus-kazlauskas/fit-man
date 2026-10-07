@@ -17,6 +17,7 @@ paths:
       requestBody:
         description: .fit file
         required: true
+        x-kotlin-binary-type: org.springframework.core.io.Resource
         content:
           application/octet-stream:
             schema:

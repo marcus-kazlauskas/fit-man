@@ -21,11 +21,12 @@ cd ..
 
 ```shell
 ./gradlew bootRun                 # run the app on localhost:8080
-./gradlew build                   # full build: compile, test, jacoco coverage verification, pmd
+./gradlew build                   # full build: compile, test, jacoco coverage verification, ktlint
 ./gradlew test                    # run tests only
 ./gradlew test --tests "fit.man.app.service.AnalysisServiceTests"          # single test class
 ./gradlew test --tests "fit.man.app.service.AnalysisServiceTests.methodName" # single test method
-./gradlew pmdMain                 # static analysis (also runs automatically before bootRun)
+./gradlew ktlintCheck             # static analysis (main source set also runs automatically before bootRun)
+./gradlew ktlintFormat            # auto-fix formatting issues
 ./gradlew jacocoTestReport        # coverage report (build/reports/jacoco)
 ```
 
@@ -85,5 +86,5 @@ mark values) — reuse these constants rather than redefining them. Lombok is co
 
 Tests mirror `src/main/java` package structure under `src/test/java`. `fixtures/ActivityFixtures.java` is the shared
 builder for `Activity`/`Record`/`Event` test data — extend it rather than hand-rolling entity graphs in new tests.
-Jacoco enforces 80% line coverage (`build.gradle` `jacocoTestCoverageVerification`) as part of `./gradlew build`;
+Jacoco enforces 80% line coverage (`build.gradle.kts` `jacocoTestCoverageVerification`) as part of `./gradlew build`;
 generated API code, mappers, and `*Util` classes are excluded from that check.
