@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Activities Management</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .page-header a {
+            color: #0067F4;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .page-header a:hover {
+            text-decoration: underline;
+        }
+
+        .panel {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upload-box {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .file-name-field {
+            background-color: white;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            font-size: 14px;
+            width: 220px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            color: #333333;
+            cursor: pointer;
+        }
+
+        .file-name-field span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .upload-status {
+            font-size: 14px;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+        }
+
+        .upload-status.error {
+            color: #c0392b;
+        }
+
+        .upload-status.success {
+            color: #2e7d32;
+        }
+
+        .action-btn {
+            background-color: #0067F4;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .upload-box .action-btn {
+            border-radius: 0;
+        }
+
+        .action-btn:hover {
+            background-color: #0052c2;
+        }
+
+        .action-btn:disabled {
+            background-color: #9fb9db;
+            cursor: default;
+        }
+
+        .action-btn.secondary {
+            background-color: #6c757d;
+            padding: 6px 12px;
+        }
+
+        .action-btn.secondary:hover {
+            background-color: #565e64;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            color: #333333;
+            font-weight: bold;
+            background-color: #f1f3f5;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f7ff;
+        }
+
+        .empty-row td {
+            text-align: center;
+            color: #888888;
+            padding: 20px;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pager span {
+            font-size: 14px;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="page-header">
+            <h3>Activities 🚲</h3>
+            <div class="upload-box">
+                <input type="file" id="fileInput" accept=".fit" onchange="onFileSelected()" hidden>
+                <div class="file-name-field" id="chooseFileBtn" onclick="document.getElementById('fileInput').click()">
+                    <span id="chooseFileLabel">Choose .fit file</span>
+                </div>
+                <button class="action-btn" id="uploadBtn" onclick="uploadActivity()">Upload</button>
+            </div>
+            <a href="/map">View map &rarr;</a>
+        </div>
+        <div class="upload-status" id="uploadStatus"></div>
+
+        <div class="panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Start time</th>
+                        <th>Total elapsed time</th>
+                        <th>Total distance</th>
+                        <th>Moving time</th>
+                        <th>Average speed</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                    <tr class="empty-row">
+                        <td colspan="5">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pager">
+                <button class="action-btn secondary" id="prevPageBtn" onclick="changePage(-1)">&larr; Prev</button>
+                <span id="pagerLabel">Page 1 of 1</span>
+                <button class="action-btn secondary" id="nextPageBtn" onclick="changePage(1)">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pageSize = 10;
+        let currentPage = 0;
+        let totalPages = 1;
+
+        async function loadActivities(page) {
+            const tableBody = document.getElementById('activityTableBody');
+            tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`/activity/list?page=${page}&size=${pageSize}`);
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+                const result = await response.json();
+
+                currentPage = result.page;
+                totalPages = Math.max(result.totalPages, 1);
+
+                renderTable(result.items);
+                updatePager();
+            } catch (e) {
+                tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">Failed to load activities: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderTable(items) {
+            const tableBody = document.getElementById('activityTableBody');
+
+            if (!items || items.length === 0) {
+                tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">No activities found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = items.map(activity => {
+                const startTime = activity.startTime
+                    ? new Date(activity.startTime).toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    })
+                    : '...';
+                const totalElapsedTime = activity.totalElapsedTime
+                    ? new Date(activity.totalElapsedTime * 1000).toISOString().slice(11, 19)
+                    : '...';
+                const totalDistance = activity.totalDistance
+                    ? `${(activity.totalDistance / 1000).toFixed(2)} km`
+                    : '...';
+                const movingTime = activity.movingTime
+                    ? new Date(activity.movingTime * 1000).toISOString().slice(11, 19)
+                    : '...';
+                const averageSpeed = activity.averageSpeed
+                    ? `${Number(activity.averageSpeed).toFixed(2)} km/h`
+                    : '...';
+
+                return `<tr>
+                    <td>${startTime}</td>
+                    <td>${totalElapsedTime}</td>
+                    <td>${totalDistance}</td>
+                    <td>${movingTime}</td>
+                    <td>${averageSpeed}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function updatePager() {
+            document.getElementById('pagerLabel').textContent = `Page ${currentPage + 1} of ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentPage <= 0;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages - 1;
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage < 0 || newPage >= totalPages) {
+                return;
+            }
+            loadActivities(newPage);
+        }
+
+        function onFileSelected() {
+            const file = document.getElementById('fileInput').files[0];
+            document.getElementById('chooseFileLabel').textContent = file ? file.name : 'Choose .fit file';
+        }
+
+        async function uploadActivity() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const status = document.getElementById('uploadStatus');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                status.className = 'upload-status error';
+                status.textContent = 'Select a .fit file first';
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            status.className = 'upload-status';
+            status.textContent = 'Uploading...';
+
+            try {
+                const body = await file.arrayBuffer();
+                const response = await fetch('/file/upload', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/octet-stream'},
+                    body
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.message ?? `Request failed with status ${response.status}`);
+                }
+
+                status.className = 'upload-status success';
+                status.textContent = `Uploaded activity #${payload.id}`;
+                fileInput.value = '';
+                onFileSelected();
+                await loadActivities(0);
+            } catch (e) {
+                status.className = 'upload-status error';
+                status.textContent = e.message;
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => loadActivities(currentPage));
+    </script>
+</body>
+</html>
