@@ -10,6 +10,7 @@
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
 
         .main-container {
@@ -29,6 +30,10 @@
             gap: 20px;
         }
 
+        .app-title {
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+        }
+
         .page-header a {
             color: #0067F4;
             text-decoration: none;
@@ -42,7 +47,7 @@
         }
 
         .panel {
-            background-color: #f8f9fa;
+            background-color: white;
             border: 1px solid #dee2e6;
             border-radius: 4px;
             padding: 10px;
@@ -117,15 +122,6 @@
             cursor: default;
         }
 
-        .action-btn.secondary {
-            background-color: #6c757d;
-            padding: 6px 12px;
-        }
-
-        .action-btn.secondary:hover {
-            background-color: #565e64;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -142,16 +138,20 @@
             color: #333333;
             font-weight: bold;
             background-color: #f1f3f5;
+            border-bottom: none;
         }
 
         tbody tr:hover {
             background-color: #f1f7ff;
         }
 
+        .filler-row:hover {
+            background-color: transparent;
+        }
+
         .empty-row td {
             text-align: center;
             color: #888888;
-            padding: 20px;
         }
 
         .pager {
@@ -171,7 +171,7 @@
 <body>
     <div class="main-container">
         <div class="page-header">
-            <h3>Activities 🚲</h3>
+            <h3 class="app-title">fit-man</h3>
             <div class="upload-box">
                 <input type="file" id="fileInput" accept=".fit" onchange="onFileSelected()" hidden>
                 <div class="file-name-field" id="chooseFileBtn" onclick="document.getElementById('fileInput').click()">
@@ -202,9 +202,9 @@
             </table>
 
             <div class="pager">
-                <button class="action-btn secondary" id="prevPageBtn" onclick="changePage(-1)">&larr; Prev</button>
+                <button class="action-btn" id="prevPageBtn" onclick="changePage(-1)">&larr; Prev</button>
                 <span id="pagerLabel">Page 1 of 1</span>
-                <button class="action-btn secondary" id="nextPageBtn" onclick="changePage(1)">Next &rarr;</button>
+                <button class="action-btn" id="nextPageBtn" onclick="changePage(1)">Next &rarr;</button>
             </div>
         </div>
     </div>
@@ -214,9 +214,18 @@
         let currentPage = 0;
         let totalPages = 1;
 
+        function fillerRowsHtml(usedRows) {
+            const fillerCount = pageSize - usedRows;
+            return fillerCount > 0 ? '<tr class="filler-row"><td colspan="5">&nbsp;</td></tr>'.repeat(fillerCount) : '';
+        }
+
+        function messageRowHtml(message) {
+            return `<tr class="empty-row"><td colspan="5">${message}</td></tr>${fillerRowsHtml(1)}`;
+        }
+
         async function loadActivities(page) {
             const tableBody = document.getElementById('activityTableBody');
-            tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">Loading...</td></tr>';
+            tableBody.innerHTML = messageRowHtml('Loading...');
 
             try {
                 const response = await fetch(`/activity/list?page=${page}&size=${pageSize}`);
@@ -231,7 +240,7 @@
                 renderTable(result.items);
                 updatePager();
             } catch (e) {
-                tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">Failed to load activities: ${e.message}</td></tr>`;
+                tableBody.innerHTML = messageRowHtml(`Failed to load activities: ${e.message}`);
             }
         }
 
@@ -239,7 +248,7 @@
             const tableBody = document.getElementById('activityTableBody');
 
             if (!items || items.length === 0) {
-                tableBody.innerHTML = '<tr class="empty-row"><td colspan="5">No activities found</td></tr>';
+                tableBody.innerHTML = messageRowHtml('No activities found');
                 return;
             }
 
@@ -274,7 +283,7 @@
                     <td>${movingTime}</td>
                     <td>${averageSpeed}</td>
                 </tr>`;
-            }).join('');
+            }).join('') + fillerRowsHtml(items.length);
         }
 
         function updatePager() {
@@ -303,8 +312,7 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                status.className = 'upload-status error';
-                status.textContent = 'Select a .fit file first';
+                alert('Select a .fit file first');
                 return;
             }
 

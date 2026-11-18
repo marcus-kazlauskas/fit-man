@@ -1,6 +1,7 @@
 package fit.man.app.mapper
 
 import fit.man.app.api.model.ActivityResponse
+import fit.man.app.api.model.ActivitySummary
 import fit.man.app.api.model.TrackResponse
 import fit.man.app.repository.entity.Activity
 import fit.man.app.repository.entity.Event
@@ -50,14 +51,17 @@ fun Event.toResponse(): EventResponse =
         eventType = eventType,
     )
 
-fun Activity.toTrackResponse(): TrackResponse {
+private fun Activity.trackMetrics(): Triple<Float?, Long?, Float?> {
     val currentAnalysis = analysis
-    val (trackDistance, trackMovingTime, trackAvgSpeed) =
-        if (currentAnalysis == null || !currentAnalysis.success) {
-            Triple(totalDistance, totalTimerTime!!.seconds, enhancedAvgSpeed)
-        } else {
-            Triple(currentAnalysis.totalDistance, currentAnalysis.movingTime, currentAnalysis.averageSpeed)
-        }
+    return if (currentAnalysis == null || !currentAnalysis.success) {
+        Triple(totalDistance, totalTimerTime!!.seconds, enhancedAvgSpeed)
+    } else {
+        Triple(currentAnalysis.totalDistance, currentAnalysis.movingTime, currentAnalysis.averageSpeed)
+    }
+}
+
+fun Activity.toTrackResponse(): TrackResponse {
+    val (trackDistance, trackMovingTime, trackAvgSpeed) = trackMetrics()
 
     return TrackResponse(
         startTime = ActivityUtils.toLocalDateTimeString(startTime!!),
@@ -69,5 +73,17 @@ fun Activity.toTrackResponse(): TrackResponse {
             records
                 .filter { it.positionLat != null && it.positionLong != null && it.mark == ActivityUtils.MARK_DEFAULT }
                 .map { listOf(it.positionLat!!, it.positionLong!!) },
+    )
+}
+
+fun Activity.toSummary(): ActivitySummary {
+    val (distance, movingTime, avgSpeed) = trackMetrics()
+
+    return ActivitySummary(
+        startTime = ActivityUtils.toLocalDateTimeString(startTime!!),
+        totalElapsedTime = totalElapsedTime!!.seconds,
+        totalDistance = distance,
+        movingTime = movingTime,
+        averageSpeed = avgSpeed,
     )
 }

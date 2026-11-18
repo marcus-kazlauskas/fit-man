@@ -7,6 +7,8 @@ tags:
     description: .fit files management
   - name: FitManTrack
     description: Track points
+  - name: FitManActivity
+    description: Activities listing
 paths:
   /file/upload:
     post:
@@ -70,7 +72,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /activity/list:
+    get:
+      tags:
+        - FitManActivity
+      summary: List uploaded activities page by page
+      operationId: getActivityList
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityListResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page index (0-based)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        example: 0
+    SizeParam:
+      name: size
+      in: query
+      description: Page size
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        example: 10
   schemas:
     ActivityResponse:
       type: object
@@ -227,6 +272,23 @@ components:
           type: string
           example: START
     TrackResponse:
+      allOf:
+        - $ref: "#/components/schemas/ActivitySummary"
+        - type: object
+          properties:
+            points:
+              $ref: "#/components/schemas/TrackPoints"
+    TrackPoints:
+      type: array
+      items:
+        type: array
+        items:
+          type: number
+          format: double
+      example:
+        - [55.7887, 49.1221]
+        - [55.7887, 49.1221]
+    ActivitySummary:
       type: object
       required:
         - startTime
@@ -255,18 +317,46 @@ components:
           type: number
           format: float
           example: 19.46
-        points:
-          $ref: "#/components/schemas/TrackPoints"
-    TrackPoints:
-      type: array
-      items:
-        type: array
-        items:
-          type: number
-          format: double
-      example:
-        - [55.7887, 49.1221]
-        - [55.7887, 49.1221]
+    PageInfo:
+      type: object
+      required:
+        - page
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        page:
+          description: Current page index (0-based)
+          type: integer
+          format: int32
+          example: 0
+        size:
+          description: Page size
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          description: Total number of elements
+          type: integer
+          format: int64
+          example: 42
+        totalPages:
+          description: Total number of pages
+          type: integer
+          format: int32
+          example: 5
+    ActivityListResponse:
+      allOf:
+        - $ref: "#/components/schemas/PageInfo"
+        - type: object
+          required:
+            - items
+          properties:
+            items:
+              description: Activities on the requested page
+              type: array
+              items:
+                $ref: "#/components/schemas/ActivitySummary"
     ErrorResponse:
       required:
         - code

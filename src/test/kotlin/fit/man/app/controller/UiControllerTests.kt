@@ -20,4 +20,12 @@ class UiControllerTests {
             .andExpect(status().isOk())
             .andExpect(view().name("index"))
     }
+
+    @Test
+    fun shouldReturnManagement() {
+        mockMvc
+            .perform(get("/management"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("management"))
+    }
 }
