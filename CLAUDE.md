@@ -33,6 +33,7 @@ cd ..
 Paths once running, relative to `localhost:8080`:
 - `/swagger-ui/index.html` — upload a `.fit` file and exercise other endpoints
 - `/map` — view a track
+- `/management` — browse uploaded activities (paginated) and upload new ones from the browser
 
 API contract lives in `api/openapi-fit-man.yaml` and is the source of truth for controller interfaces (see
 Architecture below) — edit the spec, not generated code.
@@ -41,13 +42,17 @@ Architecture below) — edit the spec, not generated code.
 
 ### OpenAPI-first controllers
 
-`api/openapi-fit-man.yaml` is compiled by the `openapi-generator` Gradle
-plugin into interfaces/models under `build/generated/openapi/src/main/java` (package `fit.man.app.api` /
-`fit.man.app.api.model`), added to the main source set via `sourceSets.main.java.srcDirs`. `compileJava` depends on
-`openApiGenerate`, so generated sources are always fresh on build. Controllers in
-`src/main/java/fit/man/app/controller` implement the generated `*Api` interfaces; DTOs are the generated
-`*Request`/`*Response` model classes, converted to/from JPA entities via MapStruct (`mapper/ActivityMapper.java`).
-**To change API shapes, edit the YAML spec first**, then adjust the controller/mapper implementation.
+`api/openapi-fit-man.yaml` is compiled by the `openapi-generator` Gradle plugin (`kotlin-spring` generator) into
+interfaces/models under `build/generated/openapi/src/main/kotlin` (package `fit.man.app.api` /
+`fit.man.app.api.model`), added to the main source set via `sourceSets.main.kotlin.srcDir(...)`. `compileKotlin`
+depends on `openApiGenerate`, so generated sources are always fresh on build. Controllers in
+`src/main/kotlin/fit/man/app/controller` implement the generated `*Api` interfaces; DTOs are the generated
+`*Request`/`*Response` model classes, converted to/from JPA entities via Kotlin extension functions in
+`mapper/ActivityMapping.kt` (no MapStruct/Lombok). **To change API shapes, edit the YAML spec first**, then adjust
+the controller/mapper implementation.
+
+`UiController` (plain `@Controller`, not OpenAPI-generated) serves two Thymeleaf pages, `/map` and `/management`,
+each backed by vanilla JS calling the REST endpoints above.
 
 ### Data model & pipeline
 
@@ -57,8 +62,8 @@ An `Activity` is parsed from a `.fit` file by `ActivityService.readFitFile` usin
 listener that populates the entity graph. New `.fit` fields to capture should be added as a new/extended listener
 here.
 
-Activities move through two background stages, both driven by `@Scheduled` jobs in `scheduling/AppScheduler.java`
-(interval/delay/batch size configurable under `fit-man.activity-scheduler.*`, see `config/AppProperties.java` and
+Activities move through two background stages, both driven by `@Scheduled` jobs in `scheduling/AppScheduler.kt`
+(interval/delay/batch size configurable under `fit-man.activity-scheduler.*`, see `config/AppProperties.kt` and
 `application.yaml`):
 
 1. **Markup** (`MarkupService.runMarkup`) — walks each activity's `Record`s in track order and disables (`MARK_DISABLED`)
@@ -78,13 +83,17 @@ access, since correctness depends on strictly increasing timestamp order (`@Orde
 ### Constants & conventions
 
 `util/ActivityUtils` centralizes FIT-specific magic numbers (semicircle-to-degree conversion, m/s-to-km/h factor,
-mark values) — reuse these constants rather than redefining them. Lombok is configured with
-`config.stopBubbling = true` and copies `@Qualifier` (`lombok.config`); entities use `@Getter/@Setter` rather than
-`@Data`.
+mark values) — reuse these constants rather than redefining them. JPA entities (`repository/entity`) use plain
+mutable `var` properties typed nullable (`var startTime: OffsetDateTime? = null`) rather than `lateinit` — Hibernate
+can leave entities (and lazy proxies, e.g. `Record`/`Event`/`Analysis` → `Activity` via `@ManyToOne(fetch = LAZY)`)
+in a partially-hydrated state longer than expected, and a `lateinit` getter would throw
+`UninitializedPropertyAccessException` instead of a predictable `null` in that window.
 
 ### Testing
 
-Tests mirror `src/main/java` package structure under `src/test/java`. `fixtures/ActivityFixtures.java` is the shared
-builder for `Activity`/`Record`/`Event` test data — extend it rather than hand-rolling entity graphs in new tests.
-Jacoco enforces 80% line coverage (`build.gradle.kts` `jacocoTestCoverageVerification`) as part of `./gradlew build`;
-generated API code, mappers, and `*Util` classes are excluded from that check.
+Tests mirror `src/main/kotlin` package structure under `src/test/kotlin`. `fixtures/ActivityFixtures.kt` is the
+shared builder for `Activity`/`Record`/`Event`/`Analysis` test data — extend it rather than hand-rolling entity
+graphs in new tests. Mocking uses `mockito-kotlin`'s `any()`/`whenever()` (not raw `org.mockito.Mockito`) to avoid
+Kotlin null-safety crashes on primitive/non-null parameters. Jacoco enforces 80% line coverage (`build.gradle.kts`
+`jacocoTestCoverageVerification`) as part of `./gradlew build`; generated API code, mappers, and `*Util` classes are
+excluded from that check.

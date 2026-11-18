@@ -240,6 +240,18 @@
                 alert("No data for this period");
             }
         }
+
+        function queryParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        const presetBegin = queryParam('startTimeBegin');
+        const presetEnd = queryParam('startTimeEnd');
+        if (presetBegin && presetEnd) {
+            startTimeBegin.value = presetBegin;
+            startTimeEnd.value = presetEnd;
+            loadTrack();
+        }
     </script>
 </body>
 </html>
