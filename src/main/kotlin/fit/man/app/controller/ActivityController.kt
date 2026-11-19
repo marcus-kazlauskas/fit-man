@@ -13,5 +13,7 @@ class ActivityController(
     override fun getActivityList(
         page: Int,
         size: Int,
-    ): ResponseEntity<ActivityListResponse> = ResponseEntity.ok(activityService.getActivityList(page, size))
+        sortField: String?,
+        sortDirection: String?,
+    ): ResponseEntity<ActivityListResponse> = ResponseEntity.ok(activityService.getActivityList(page, size, sortField, sortDirection))
 }

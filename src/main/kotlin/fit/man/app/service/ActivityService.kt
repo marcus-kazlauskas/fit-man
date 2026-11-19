@@ -183,8 +183,13 @@ class ActivityService(
     fun getActivityList(
         page: Int,
         size: Int,
+        sortField: String?,
+        sortDirection: String?,
     ): ActivityListResponse {
-        val result = activityRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, Activity::id.name)))
+        val field = if (sortField.equals(Activity::startTime.name, ignoreCase = true)) Activity::startTime.name else Activity::id.name
+        val direction = sortDirection?.let { Sort.Direction.fromOptionalString(it).orElse(Sort.Direction.DESC) } ?: Sort.Direction.DESC
+
+        val result = activityRepository.findAll(PageRequest.of(page, size, Sort.by(direction, field)))
         return ActivityListResponse(
             items = result.content.map { it.toSummary() },
             page = result.number,

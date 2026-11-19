@@ -64,6 +64,7 @@ fun Activity.toTrackResponse(): TrackResponse {
     val (trackDistance, trackMovingTime, trackAvgSpeed) = trackMetrics()
 
     return TrackResponse(
+        id = id,
         startTime = ActivityUtils.toLocalDateTimeString(startTime!!),
         totalElapsedTime = totalElapsedTime!!.seconds,
         totalDistance = trackDistance,
@@ -80,6 +81,7 @@ fun Activity.toSummary(): ActivitySummary {
     val (distance, movingTime, avgSpeed) = trackMetrics()
 
     return ActivitySummary(
+        id = id,
         startTime = ActivityUtils.toLocalDateTimeString(startTime!!),
         totalElapsedTime = totalElapsedTime!!.seconds,
         totalDistance = distance,

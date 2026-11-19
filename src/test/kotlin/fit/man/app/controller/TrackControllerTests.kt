@@ -23,7 +23,7 @@ class TrackControllerTests {
     @Test
     fun shouldReturnTrackPoints() {
         whenever(activityService.getTrackInRange(anyString(), anyString()))
-            .thenReturn(TrackResponse("2026-04-01T13:12:00.000", null, null, null, null, null))
+            .thenReturn(TrackResponse(1312L, "2026-04-01T13:12:00.000", null, null, null, null, null))
 
         mockMvc
             .perform(

@@ -4,6 +4,7 @@ import fit.man.app.api.model.ActivityListResponse
 import fit.man.app.service.ActivityService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -22,7 +23,7 @@ class ActivityControllerTests {
 
     @Test
     fun shouldReturnActivityList() {
-        whenever(activityService.getActivityList(any(), any()))
+        whenever(activityService.getActivityList(any(), any(), anyOrNull(), anyOrNull()))
             .thenReturn(ActivityListResponse(items = emptyList(), page = 0, propertySize = 10, totalElements = 0, totalPages = 0))
 
         mockMvc

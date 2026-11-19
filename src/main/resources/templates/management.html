@@ -124,6 +124,7 @@
 
         table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             font-size: 14px;
         }
@@ -139,6 +140,27 @@
             font-weight: bold;
             background-color: #f1f3f5;
             border-bottom: none;
+        }
+
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+            color: #0067F4;
+        }
+
+        .sortable-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+        }
+
+        .sort-indicator.active {
+            font-size: 11px;
+            color: #0067F4;
         }
 
         tbody tr:hover {
@@ -189,9 +211,18 @@
 
         <div class="panel">
             <table>
+                <colgroup>
+                    <col style="width: 8%">
+                    <col style="width: 20%">
+                    <col style="width: 19%">
+                    <col style="width: 17%">
+                    <col style="width: 17%">
+                    <col style="width: 19%">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Start time</th>
+                        <th class="sortable-header" onclick="toggleSort('id')">ID<span class="sort-indicator active" id="sortIndicator-id">▼</span></th>
+                        <th class="sortable-header" onclick="toggleSort('startTime')">Start time<span class="sort-indicator" id="sortIndicator-startTime"></span></th>
                         <th>Total elapsed time</th>
                         <th>Total distance</th>
                         <th>Moving time</th>
@@ -200,7 +231,7 @@
                 </thead>
                 <tbody id="activityTableBody">
                     <tr class="empty-row">
-                        <td colspan="5">Loading...</td>
+                        <td colspan="6">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -214,20 +245,32 @@
     </div>
 
     <script>
-        const pageSize = 10;
+        function computePageSize() {
+            if (window.innerWidth < 600) {
+                return 5;
+            }
+            if (window.innerWidth < 1024) {
+                return 10;
+            }
+            return 15;
+        }
+
+        const pageSize = computePageSize();
         let currentPage = 0;
         let totalPages = 1;
+        let sortField = 'id';
+        let sortDirection = 'desc';
 
         const tableBody = document.getElementById('activityTableBody');
         const fileInput = document.getElementById('fileInput');
 
         function fillerRowsHtml(usedRows) {
             const fillerCount = pageSize - usedRows;
-            return fillerCount > 0 ? '<tr class="filler-row"><td colspan="5">&nbsp;</td></tr>'.repeat(fillerCount) : '';
+            return fillerCount > 0 ? '<tr class="filler-row"><td colspan="6">&nbsp;</td></tr>'.repeat(fillerCount) : '';
         }
 
         function messageRowHtml(message) {
-            return `<tr class="empty-row"><td colspan="5">${message}</td></tr>${fillerRowsHtml(1)}`;
+            return `<tr class="empty-row"><td colspan="6">${message}</td></tr>${fillerRowsHtml(1)}`;
         }
 
         function formatDateTime(value) {
@@ -259,6 +302,7 @@
             const trackLink = `/map?startTimeBegin=${encodeURIComponent(activity.startTime)}&startTimeEnd=${encodeURIComponent(activity.startTime)}`;
 
             return `<tr class="activity-row" onclick="window.location.href='${trackLink}'">
+                <td>${activity.id}</td>
                 <td>${formatDateTime(activity.startTime)}</td>
                 <td>${formatDuration(activity.totalElapsedTime)}</td>
                 <td>${formatDistance(activity.totalDistance)}</td>
@@ -267,11 +311,30 @@
             </tr>`;
         }
 
+        function toggleSort(field) {
+            sortDirection = sortField === field && sortDirection === 'desc' ? 'asc' : 'desc';
+            sortField = field;
+
+            ['id', 'startTime'].forEach(f => {
+                const indicator = document.getElementById(`sortIndicator-${f}`);
+                if (f === sortField) {
+                    indicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+                    indicator.classList.add('active');
+                } else {
+                    indicator.textContent = '';
+                    indicator.classList.remove('active');
+                }
+            });
+
+            loadActivities(0);
+        }
+
         async function loadActivities(page) {
             tableBody.innerHTML = messageRowHtml('Loading...');
 
             try {
-                const response = await fetch(`/activity/list?page=${page}&size=${pageSize}`);
+                const sortParam = sortField ? `&sortField=${sortField}&sortDirection=${sortDirection}` : '';
+                const response = await fetch(`/activity/list?page=${page}&size=${pageSize}${sortParam}`);
                 if (!response.ok) {
                     throw new Error(`Request failed with status ${response.status}`);
                 }

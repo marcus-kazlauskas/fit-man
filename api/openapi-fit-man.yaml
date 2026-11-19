@@ -81,6 +81,15 @@ paths:
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/SizeParam"
+        - name: sortField
+          in: query
+          description: Field to sort by; omit to keep the default (id, newest upload first)
+          required: false
+          schema:
+            type: string
+            enum: [id, startTime]
+            example: id
+        - $ref: "#/components/parameters/SortDirectionParam"
       responses:
         "200":
           description: Successful operation
@@ -116,6 +125,15 @@ components:
         format: int32
         default: 10
         example: 10
+    SortDirectionParam:
+      name: sortDirection
+      in: query
+      description: Sort direction, ascending or descending; omit to keep the default (desc)
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        example: desc
   schemas:
     ActivityResponse:
       type: object
@@ -291,8 +309,14 @@ components:
     ActivitySummary:
       type: object
       required:
+        - id
         - startTime
       properties:
+        id:
+          description: Activity ID
+          type: integer
+          format: int64
+          example: 1312
         startTime:
           description: Start date of the activity
           type: string
