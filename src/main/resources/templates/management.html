@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Activities Management</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .app-title {
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+        }
+
+        .page-header a {
+            color: #0067F4;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .page-header a:hover {
+            text-decoration: underline;
+        }
+
+        .panel {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upload-box {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .file-name-field {
+            background-color: white;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            font-size: 14px;
+            width: 220px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            color: #333333;
+            cursor: pointer;
+        }
+
+        .file-name-field span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .upload-status {
+            font-size: 14px;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+        }
+
+        .upload-status.error {
+            color: #c0392b;
+        }
+
+        .upload-status.success {
+            color: #2e7d32;
+        }
+
+        .action-btn {
+            background-color: #0067F4;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .upload-box .action-btn {
+            border-radius: 0;
+        }
+
+        .action-btn:hover {
+            background-color: #0052c2;
+        }
+
+        .action-btn:disabled {
+            background-color: #9fb9db;
+            cursor: default;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            color: #333333;
+            font-weight: bold;
+            background-color: #f1f3f5;
+            border-bottom: none;
+        }
+
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+            color: #0067F4;
+        }
+
+        .sortable-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .sort-indicator {
+            display: inline-block;
+            width: 14px;
+            text-align: center;
+        }
+
+        .sort-indicator.active {
+            font-size: 11px;
+            color: #0067F4;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f7ff;
+        }
+
+        .activity-row {
+            cursor: pointer;
+        }
+
+        .filler-row:hover {
+            background-color: transparent;
+        }
+
+        .empty-row td {
+            text-align: center;
+            color: #888888;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pager span {
+            font-size: 14px;
+            font-family: ui-monospace, Consolas, "Liberation Mono", monospace;
+            color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="page-header">
+            <h3 class="app-title">fit-man</h3>
+            <div class="upload-box">
+                <input type="file" id="fileInput" accept=".fit" onchange="onFileSelected()" hidden>
+                <div class="file-name-field" id="chooseFileBtn" onclick="fileInput.click()">
+                    <span id="chooseFileLabel">Choose .fit file</span>
+                </div>
+                <button class="action-btn" id="uploadBtn" onclick="uploadActivity()">Upload</button>
+            </div>
+            <a href="/map">View map &rarr;</a>
+        </div>
+        <div class="upload-status" id="uploadStatus"></div>
+
+        <div class="panel">
+            <table>
+                <colgroup>
+                    <col style="width: 8%">
+                    <col style="width: 20%">
+                    <col style="width: 19%">
+                    <col style="width: 17%">
+                    <col style="width: 17%">
+                    <col style="width: 19%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="sortable-header" onclick="toggleSort('id')">ID<span class="sort-indicator active" id="sortIndicator-id">▼</span></th>
+                        <th class="sortable-header" onclick="toggleSort('startTime')">Start time<span class="sort-indicator" id="sortIndicator-startTime"></span></th>
+                        <th>Total elapsed time</th>
+                        <th>Total distance</th>
+                        <th>Moving time</th>
+                        <th>Average speed</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                    <tr class="empty-row">
+                        <td colspan="6">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pager">
+                <button class="action-btn" id="prevPageBtn" onclick="changePage(-1)">&larr; Prev</button>
+                <span id="pagerLabel">Page 1 of 1</span>
+                <button class="action-btn" id="nextPageBtn" onclick="changePage(1)">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function computePageSize() {
+            if (window.innerWidth < 600) {
+                return 5;
+            }
+            if (window.innerWidth < 1024) {
+                return 10;
+            }
+            return 15;
+        }
+
+        const pageSize = computePageSize();
+        let currentPage = 0;
+        let totalPages = 1;
+        let sortField = 'id';
+        let sortDirection = 'desc';
+
+        const tableBody = document.getElementById('activityTableBody');
+        const fileInput = document.getElementById('fileInput');
+
+        function fillerRowsHtml(usedRows) {
+            const fillerCount = pageSize - usedRows;
+            return fillerCount > 0 ? '<tr class="filler-row"><td colspan="6">&nbsp;</td></tr>'.repeat(fillerCount) : '';
+        }
+
+        function messageRowHtml(message) {
+            return `<tr class="empty-row"><td colspan="6">${message}</td></tr>${fillerRowsHtml(1)}`;
+        }
+
+        function formatDateTime(value) {
+            return value
+                ? new Date(value).toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                })
+                : '...';
+        }
+
+        function formatDuration(seconds) {
+            return seconds ? new Date(seconds * 1000).toISOString().slice(11, 19) : '...';
+        }
+
+        function formatDistance(meters) {
+            return meters ? `${(meters / 1000).toFixed(2)} km` : '...';
+        }
+
+        function formatSpeed(kmh) {
+            return kmh ? `${Number(kmh).toFixed(2)} km/h` : '...';
+        }
+
+        function renderRow(activity) {
+            const trackLink = `/map?startTimeBegin=${encodeURIComponent(activity.startTime)}&startTimeEnd=${encodeURIComponent(activity.startTime)}`;
+
+            return `<tr class="activity-row" onclick="window.location.href='${trackLink}'">
+                <td>${activity.id}</td>
+                <td>${formatDateTime(activity.startTime)}</td>
+                <td>${formatDuration(activity.totalElapsedTime)}</td>
+                <td>${formatDistance(activity.totalDistance)}</td>
+                <td>${formatDuration(activity.movingTime)}</td>
+                <td>${formatSpeed(activity.averageSpeed)}</td>
+            </tr>`;
+        }
+
+        function toggleSort(field) {
+            sortDirection = sortField === field && sortDirection === 'desc' ? 'asc' : 'desc';
+            sortField = field;
+
+            ['id', 'startTime'].forEach(f => {
+                const indicator = document.getElementById(`sortIndicator-${f}`);
+                if (f === sortField) {
+                    indicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+                    indicator.classList.add('active');
+                } else {
+                    indicator.textContent = '';
+                    indicator.classList.remove('active');
+                }
+            });
+
+            loadActivities(0);
+        }
+
+        async function loadActivities(page) {
+            tableBody.innerHTML = messageRowHtml('Loading...');
+
+            try {
+                const sortParam = sortField ? `&sortField=${sortField}&sortDirection=${sortDirection}` : '';
+                const response = await fetch(`/activity/list?page=${page}&size=${pageSize}${sortParam}`);
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+                const result = await response.json();
+
+                currentPage = result.page;
+                totalPages = Math.max(result.totalPages, 1);
+
+                renderTable(result.items);
+                updatePager();
+            } catch (e) {
+                tableBody.innerHTML = messageRowHtml(`Failed to load activities: ${e.message}`);
+            }
+        }
+
+        function renderTable(items) {
+            if (!items || items.length === 0) {
+                tableBody.innerHTML = messageRowHtml('No activities found');
+                return;
+            }
+
+            tableBody.innerHTML = items.map(renderRow).join('') + fillerRowsHtml(items.length);
+        }
+
+        function updatePager() {
+            document.getElementById('pagerLabel').textContent = `Page ${currentPage + 1} of ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentPage <= 0;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages - 1;
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage < 0 || newPage >= totalPages) {
+                return;
+            }
+            loadActivities(newPage);
+        }
+
+        function onFileSelected() {
+            const file = fileInput.files[0];
+            document.getElementById('chooseFileLabel').textContent = file ? file.name : 'Choose .fit file';
+        }
+
+        async function uploadActivity() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const status = document.getElementById('uploadStatus');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Select a .fit file first');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            status.className = 'upload-status';
+            status.textContent = 'Uploading...';
+
+            try {
+                const body = await file.arrayBuffer();
+                const response = await fetch('/file/upload', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/octet-stream'},
+                    body
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.message ?? `Request failed with status ${response.status}`);
+                }
+
+                status.className = 'upload-status success';
+                status.textContent = `Uploaded activity #${payload.id}`;
+                fileInput.value = '';
+                onFileSelected();
+                await loadActivities(0);
+            } catch (e) {
+                status.className = 'upload-status error';
+                status.textContent = e.message;
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => loadActivities(currentPage));
+    </script>
+</body>
+</html>

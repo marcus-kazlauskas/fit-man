@@ -11,10 +11,12 @@ import com.garmin.fit.SportMesg
 import com.garmin.fit.UserProfileMesg
 import fit.man.app.advice.exception.ActivityNotFoundException
 import fit.man.app.advice.exception.FitFileException
+import fit.man.app.api.model.ActivityListResponse
 import fit.man.app.api.model.ActivityResponse
 import fit.man.app.api.model.TrackResponse
 import fit.man.app.config.AppProperties
 import fit.man.app.mapper.toResponse
+import fit.man.app.mapper.toSummary
 import fit.man.app.mapper.toTrackResponse
 import fit.man.app.repository.ActivityRepository
 import fit.man.app.repository.entity.Activity
@@ -178,6 +180,25 @@ class ActivityService(
         throw ActivityNotFoundException("No activity with startTime specified")
     }
 
+    fun getActivityList(
+        page: Int,
+        size: Int,
+        sortField: String?,
+        sortDirection: String?,
+    ): ActivityListResponse {
+        val field = if (sortField.equals(Activity::startTime.name, ignoreCase = true)) Activity::startTime.name else Activity::id.name
+        val direction = sortDirection?.let { Sort.Direction.fromOptionalString(it).orElse(Sort.Direction.DESC) } ?: Sort.Direction.DESC
+
+        val result = activityRepository.findAll(PageRequest.of(page, size, Sort.by(direction, field)))
+        return ActivityListResponse(
+            items = result.content.map { it.toSummary() },
+            page = result.number,
+            propertySize = result.size,
+            totalElements = result.totalElements,
+            totalPages = result.totalPages,
+        )
+    }
+
     fun findActivitiesForMarkup(): List<Activity> {
         val activities = activityRepository.findByMarkedFalse(activityRequest)
         for (activity in activities) {
@@ -198,5 +219,5 @@ class ActivityService(
     }
 
     private val activityRequest: Pageable
-        get() = PageRequest.of(0, appProperties.activityScheduler.batchSize, Sort.by("startTime"))
+        get() = PageRequest.of(0, appProperties.activityScheduler.batchSize, Sort.by(Activity::startTime.name))
 }

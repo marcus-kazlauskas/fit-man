@@ -8,4 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 class UiController {
     @GetMapping("/map")
     fun showPage(model: Model): String = "index"
+
+    @GetMapping("/management")
+    fun showManagementPage(): String = "management"
 }

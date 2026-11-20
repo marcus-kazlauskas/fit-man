@@ -4,9 +4,9 @@
 
 Version 2.0.0
 
-This app is intended to fix GPS signal losses in activities recorded by mobile devices in .fit format. You can upload 
-such an activity (for example, [this file](src/test/resources/files/3669406B-081F-4E9D-B36E-C15FFB139DA9.fit)) 
-via `/swagger-ui/index.html` page and open `/map`. You might see something like this:
+This app is intended to fix GPS signal losses in activities recorded by mobile devices in .fit format. You can upload
+such an activity (for example, [this file](src/test/resources/files/3669406B-081F-4E9D-B36E-C15FFB139DA9.fit))
+via the `/management` page and click on its row to open it on `/map`. You might see something like this:
 
 ![Screenshot 2026-07-21 at 16.37.09.png](src/test/resources/files/Screenshot%202026-07-21%20at%2016.37.09.png)
 
@@ -42,8 +42,9 @@ Application:
 
 Paths relative to `localhost:8080`:
 
-- `/swagger-ui/index.html` - upload .fit file and other Swagger methods
+- `/swagger-ui/index.html` - explore and test the raw API directly
 - `/map` - view track
+- `/management` - browse uploaded activities (paginated), upload a new one, click a row to view its track on `/map`
 
 Openapi description in [openapi-fit-man.yaml](api/openapi-fit-man.yaml).
 

@@ -13,13 +13,21 @@ import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Import
 import org.springframework.core.io.Resource
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import java.time.Duration
@@ -175,6 +183,61 @@ class ActivityServiceTests {
             { assertEquals(47520L, track.movingTime) },
             { assertEquals(4F, track.averageSpeed) },
         )
+    }
+
+    @Test
+    fun shouldGetActivityList() {
+        val activity = ActivityFixtures.createNewActivity()
+
+        whenever(activityRepository.findAll(any<Pageable>()))
+            .thenReturn(PageImpl(listOf(activity), PageRequest.of(0, 10), 1))
+
+        val result = activityService.getActivityList(0, 10, null, null)
+
+        assertThat(result.items).hasSize(1)
+        assertAll(
+            { assertEquals(0, result.page) },
+            { assertEquals(10, result.propertySize) },
+            { assertEquals(1L, result.totalElements) },
+            { assertEquals(1, result.totalPages) },
+        )
+        val summary = result.items.first()
+        assertAll(
+            { assertEquals(0L, summary.id) },
+            { assertEquals("2026-04-23T13:12", summary.startTime) },
+            { assertEquals(86400L, summary.totalElapsedTime) },
+            { assertEquals(13.12F, summary.totalDistance) },
+            { assertEquals(47520L, summary.movingTime) },
+            { assertEquals(4F, summary.averageSpeed) },
+        )
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        nullValues = ["null"],
+        value = [
+            "null,      null, id,        DESC",
+            "startTime, asc,  startTime, ASC",
+            "startTime, desc, startTime, DESC",
+        ],
+    )
+    fun shouldSortActivityList(
+        sortField: String?,
+        sortDirection: String?,
+        expectedField: String,
+        expectedDirection: Sort.Direction,
+    ) {
+        whenever(activityRepository.findAll(any<Pageable>()))
+            .thenReturn(PageImpl(emptyList(), PageRequest.of(0, 10), 0))
+
+        activityService.getActivityList(0, 10, sortField, sortDirection)
+
+        val pageable = argumentCaptor<Pageable>()
+        verify(activityRepository).findAll(pageable.capture())
+        val order = pageable.firstValue.sort.getOrderFor(expectedField)
+
+        assertThat(order).isNotNull()
+        assertThat(order!!.direction).isEqualTo(expectedDirection)
     }
 
     @Test

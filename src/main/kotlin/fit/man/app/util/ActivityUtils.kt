@@ -6,6 +6,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import kotlin.math.pow
 
 object ActivityUtils {
     const val ACTIVITY_TABLE_ID = "activity_id"
@@ -17,7 +18,7 @@ object ActivityUtils {
     const val MARK_DEFAULT: Short = 1
 
     @JvmField
-    val DECIMAL_DEGREES = 180.0 / Math.pow(2.0, 31.0)
+    val DECIMAL_DEGREES = 180.0 / 2.0.pow(31.0)
 
     fun toOffsetDateTime(dateTime: String): OffsetDateTime =
         LocalDateTime
